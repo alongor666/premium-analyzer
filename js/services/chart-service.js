@@ -13,12 +13,14 @@ class ChartService {
    * @param {string} containerId - 容器ID
    * @param {string} chartType - 图表类型
    * @param {Array} data - 图表数据
+   * @param {Object} options - 可选配置 { roseType, maxItems, showOthers }
    */
-  renderChart(containerId, chartType, data) {
+  renderChart(containerId, chartType, data, options = {}) {
     console.log(`[ChartService] 渲染图表: ${containerId}`, {
       chartType,
       dataLength: data?.length,
-      dataSample: data?.slice(0, 2)
+      dataSample: data?.slice(0, 2),
+      options
     });
 
     const container = document.getElementById(containerId);
@@ -41,10 +43,13 @@ class ChartService {
 
       // 响应式调整
       window.addEventListener('resize', () => chart.resize());
+
+      // 绑定点击事件
+      this.setupChartEvents(chart, chartType, containerId, data, options);
     }
 
     // 构建配置
-    const option = this.buildOption(chartType, data);
+    const option = this.buildOption(chartType, data, options);
     console.log(`[ChartService] ECharts配置:`, option);
 
     // 设置配置
@@ -58,14 +63,14 @@ class ChartService {
    * 构建ECharts配置
    * 参考：autowrKPI/js/dashboard.js:404-616
    */
-  buildOption(chartType, data) {
+  buildOption(chartType, data, options = {}) {
     switch(chartType) {
       case 'line':
         return this.buildLineChart(data);
       case 'bar':
-        return this.buildBarChart(data);
+        return this.buildBarChart(data, options);
       case 'pie':
-        return this.buildPieChart(data);
+        return this.buildPieChart(data, options);
       default:
         return {};
     }
@@ -137,13 +142,15 @@ class ChartService {
    * 柱状图配置（TOP5机构）
    * 参考：autowrKPI/js/dashboard.js:462-476（X轴优化）
    */
-  buildBarChart(data) {
+  buildBarChart(data, options = {}) {
+    const { expandFromOthers = false } = options;
+
     return {
       grid: {
         left: '3%',
         right: '4%',
         bottom: '15%',
-        top: '15%',
+        top: expandFromOthers ? '10%' : '15%',
         containLabel: true
       },
       tooltip: {
@@ -157,8 +164,8 @@ class ChartService {
           return `
             <strong>${param.axisValue}</strong><br/>
             ${param.marker} 保费收入: ${formatPremium(param.value)}<br/>
-            占比: ${formatRatio(dataItem.ratio)}<br/>
-            记录数: ${dataItem.count}
+            占比: ${formatRatio(dataItem?.ratio || 0)}<br/>
+            记录数: ${dataItem?.count || 0}
           `;
         }
       },
@@ -200,13 +207,50 @@ class ChartService {
   }
 
   /**
-   * 饼图配置
+   * 饼图/玫瑰图配置
+   * 支持 TOP N + 其他，支持玫瑰图模式
    */
-  buildPieChart(data) {
+  buildPieChart(data, options = {}) {
+    const {
+      roseType = null,      // 'area' | 'radius' | null
+      maxItems = 6,         // 最大显示数量
+      showOthers = true     // 是否显示"其他"
+    } = options;
+
+    // 聚合数据：TOP N + 其他
+    let chartData = [...data];
+    let othersData = null;
+
+    if (showOthers && data.length > maxItems) {
+      const topItems = chartData.splice(0, maxItems);
+      const othersPremium = chartData.reduce((sum, item) => sum + item.premium, 0);
+      const othersCount = chartData.reduce((sum, item) => sum + item.count, 0);
+      const totalPremium = data.reduce((sum, item) => sum + item.premium, 0);
+
+      othersData = {
+        dimension: '其他',
+        premium: othersPremium,
+        count: othersCount,
+        ratio: othersPremium / totalPremium,
+        isOthers: true  // 标记为其他项
+      };
+
+      chartData = [...topItems, othersData];
+    }
+
+    // 根据玫瑰图类型调整半径
+    const radius = roseType ? ['20%', '70%'] : ['40%', '70%'];
+
     return {
       tooltip: {
         trigger: 'item',
-        formatter: '{b}: {c}万元 ({d}%)'
+        formatter: (params) => {
+          const dataItem = chartData[params.dataIndex];
+          if (dataItem?.isOthers) {
+            return `${params.name}: ${formatPremium(params.value)} (${params.percent}%)<br/>点击查看详情`;
+          }
+          return `${params.name}: ${formatPremium(params.value)} (${params.percent}%)`;
+        }
       },
       legend: {
         orient: 'vertical',
@@ -215,17 +259,18 @@ class ChartService {
       },
       series: [{
         type: 'pie',
-        radius: ['40%', '70%'],
+        roseType: roseType,  // 'area' | 'radius' | undefined
+        radius: radius,
         avoidLabelOverlap: true,
-        data: data.map((d, index) => ({
+        data: chartData.map((d, index) => ({
           name: d.dimension,
           value: d.premium,
           itemStyle: {
-            color: this.colors[index % this.colors.length]
+            color: d.isOthers ? '#999999' : this.colors[index % this.colors.length]
           }
         })),
         label: {
-          formatter: '{b}: {d}%'
+          formatter: roseType ? '{b}\n{d}%' : '{b}: {d}%'
         },
         emphasis: {
           itemStyle: {
@@ -236,6 +281,23 @@ class ChartService {
         }
       }]
     };
+  }
+
+  /**
+   * 设置图表点击事件
+   */
+  setupChartEvents(chartInstance, chartType, containerId, originalData, options) {
+    // 为饼图/玫瑰图添加点击"其他"展开事件
+    if (chartType === 'pie' && options.showOthers) {
+      chartInstance.off('click');
+      chartInstance.on('click', (params) => {
+        if (params.name === '其他') {
+          console.log('[ChartService] 点击"其他"，展开为柱状图');
+          // 展开为柱状图，显示全部数据
+          this.renderChart(containerId, 'bar', originalData, { expandFromOthers: true });
+        }
+      });
+    }
   }
 
   /**

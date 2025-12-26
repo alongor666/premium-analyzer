@@ -53,7 +53,10 @@ class DimensionSelector {
         <div class="dimension-dropdown" style="display: none;">
           <div class="dropdown-header">
             <span class="dropdown-title">${dimension.label}</span>
-            <button class="btn-close-dropdown">×</button>
+            <div class="dropdown-actions">
+              <button class="btn btn-xs btn-invert" data-action="invert-selection">反选</button>
+              <button class="btn-close-dropdown">×</button>
+            </div>
           </div>
 
           <div class="dropdown-options">
@@ -97,6 +100,16 @@ class DimensionSelector {
         const dimensionItem = e.currentTarget.closest('.dimension-item');
         const key = dimensionItem.dataset.key;
         this.closeDropdown(key);
+      });
+    });
+
+    // 反选按钮
+    this.container.querySelectorAll('[data-action="invert-selection"]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const dimensionItem = e.currentTarget.closest('.dimension-item');
+        const key = dimensionItem.dataset.key;
+        this.handleInvertSelection(key);
       });
     });
 
@@ -182,6 +195,22 @@ class DimensionSelector {
       cb.checked = checked;
     });
 
+    this.updateDraftFilter(dimensionKey);
+  }
+
+  /**
+   * 处理反选
+   */
+  handleInvertSelection(dimensionKey) {
+    const dimensionItem = this.container.querySelector(`[data-key="${dimensionKey}"]`);
+    const checkboxes = dimensionItem.querySelectorAll('.options-list input[type="checkbox"]');
+
+    // 反转所有复选框状态
+    checkboxes.forEach(cb => {
+      cb.checked = !cb.checked;
+    });
+
+    // 更新draft筛选
     this.updateDraftFilter(dimensionKey);
   }
 

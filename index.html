@@ -83,8 +83,8 @@
         <!-- 标签页导航 -->
         <nav class="tab-navigator" id="tabNavigator">
           <button class="tab-item active" data-tab="overview">概览分析</button>
-          <button class="tab-item" data-tab="organization">机构对比</button>
-          <button class="tab-item" data-tab="dimension">维度分析</button>
+          <button class="tab-item" data-tab="barChart">柱状图</button>
+          <button class="tab-item" data-tab="ratioChart">占比图</button>
           <button class="tab-item" data-tab="detail">明细数据</button>
         </nav>
 
@@ -95,58 +95,37 @@
             <!-- 由metric-card.js动态渲染 -->
           </div>
 
-          <!-- 图表区 -->
+          <!-- 图表区 - 只有趋势图 -->
           <div class="charts-container">
-            <!-- 月度趋势图 -->
             <div class="chart-card">
               <div class="chart-header">
                 <h3 class="chart-title">月度保费趋势</h3>
-                <div class="chart-actions">
-                  <button class="btn-icon" title="刷新">🔄</button>
-                </div>
               </div>
               <div class="chart-canvas" id="chartMonthTrend" style="height: 400px;"></div>
             </div>
-
-            <!-- TOP5机构柱状图 -->
-            <div class="chart-card">
-              <div class="chart-header">
-                <h3 class="chart-title">TOP5机构保费排名</h3>
-                <div class="chart-actions">
-                  <button class="btn-icon" title="刷新">🔄</button>
-                </div>
-              </div>
-              <div class="chart-canvas" id="chartTopOrganizations" style="height: 400px;"></div>
-            </div>
           </div>
         </div>
 
-        <!-- 机构对比页 -->
-        <div class="tab-content" id="tabOrganization">
+        <!-- 柱状图页 -->
+        <div class="tab-content" id="tabBarChart">
           <div class="charts-container">
-            <div class="chart-card">
+            <div class="chart-card" id="barChartCard">
               <div class="chart-header">
-                <h3 class="chart-title">机构保费对比</h3>
+                <h3 class="chart-title">维度对比柱状图</h3>
               </div>
-              <div class="chart-canvas" id="chartOrgComparison" style="height: 500px;"></div>
+              <div class="chart-canvas" id="chartBarMain" style="height: 500px;"></div>
             </div>
           </div>
         </div>
 
-        <!-- 维度分析页 -->
-        <div class="tab-content" id="tabDimension">
-          <div class="dimension-analysis-grid">
-            <div class="chart-card">
+        <!-- 占比图页 -->
+        <div class="tab-content" id="tabRatioChart">
+          <div class="charts-container">
+            <div class="chart-card" id="ratioChartCard">
               <div class="chart-header">
-                <h3 class="chart-title">维度分布饼图</h3>
+                <h3 class="chart-title">维度占比玫瑰图</h3>
               </div>
-              <div class="chart-canvas" id="chartDimensionPie" style="height: 400px;"></div>
-            </div>
-            <div class="chart-card">
-              <div class="chart-header">
-                <h3 class="chart-title">维度排名柱状图</h3>
-              </div>
-              <div class="chart-canvas" id="chartDimensionBar" style="height: 400px;"></div>
+              <div class="chart-canvas" id="chartRatioMain" style="height: 500px;"></div>
             </div>
           </div>
         </div>
@@ -207,6 +186,7 @@
   <!-- UI组件 -->
   <script src="js/components/file-uploader.js"></script>
   <script src="js/components/dimension-selector.js"></script>
+  <script src="js/components/chart-dimension-selector.js"></script>
   <script src="js/components/metric-card.js"></script>
 
   <!-- 服务模块 -->

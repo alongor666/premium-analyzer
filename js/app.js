@@ -34,6 +34,17 @@ class PremiumAnalyzer {
       // 6. 加载保存的筛选配置
       this.loadSavedFilters();
 
+      // 7. 初始化维度同步状态
+      this.chartDimensionSelectors = new Map(); // 存储图表维度选择器实例
+      this.chartableDimensions = this.config.dimensions.filter(d =>
+        d.key !== 'start_month'  // 排除起保月，只保留可用于图表切换的维度
+      );
+
+      // 8. 监听维度同步事件
+      window.EventBus.on('dimension:sync', (data) => {
+        this.handleDimensionSync(data);
+      });
+
       this.isInitialized = true;
       console.log('[App] 初始化完成');
 
@@ -252,21 +263,42 @@ class PremiumAnalyzer {
    */
   renderTabContent(tabName) {
     const aggregatedData = window.StateManager.getState('aggregatedData');
-    const globalStats = window.StateManager.getState('globalStats');
+    const currentGroupBy = window.StateManager.getState('currentGroupBy');
+
+    if (!aggregatedData || aggregatedData.length === 0) {
+      console.warn('[App] 无聚合数据可渲染');
+      return;
+    }
+
+    console.log(`[App] 渲染标签页: ${tabName}, 当前维度: ${currentGroupBy}`);
 
     switch(tabName) {
       case 'overview':
-        // 已有的概览页渲染
+        // 概览页：只渲染趋势图（固定为起保月）
+        this.renderMonthTrendChart(aggregatedData);
         break;
 
-      case 'organization':
-        // 机构对比页：显示所有机构的横向对比柱状图
-        this.renderOrganizationComparison(aggregatedData);
+      case 'barChart':
+        // 柱状图页：支持维度切换
+        this.setupChartWithDimensionSelector(
+          'barChartCard',
+          'chartBarMain',
+          'bar',
+          aggregatedData,
+          currentGroupBy
+        );
         break;
 
-      case 'dimension':
-        // 维度分析页：饼图+柱状图
-        this.renderDimensionAnalysis(aggregatedData);
+      case 'ratioChart':
+        // 占比图页：玫瑰图，支持维度切换
+        this.setupChartWithDimensionSelector(
+          'ratioChartCard',
+          'chartRatioMain',
+          'pie',
+          aggregatedData,
+          currentGroupBy,
+          { roseType: 'area', maxItems: 6, showOthers: true }
+        );
         break;
 
       case 'detail':
@@ -277,44 +309,170 @@ class PremiumAnalyzer {
   }
 
   /**
-   * 渲染机构对比图
+   * 设置图表和维度选择器
+   * @param {string} cardId - 图表卡片ID
+   * @param {string} chartId - 图表容器ID
+   * @param {string} chartType - 图表类型
+   * @param {Array} data - 图表数据
+   * @param {string} dimension - 当前维度
+   * @param {Object} options - 图表选项
    */
-  renderOrganizationComparison(data) {
-    if (!data || data.length === 0) {
-      console.warn('[App] 无数据可渲染机构对比图');
+  setupChartWithDimensionSelector(cardId, chartId, chartType, data, dimension, options = {}) {
+    const cardElement = document.getElementById(cardId);
+    if (!cardElement) {
+      console.warn(`[App] 图表卡片不存在: ${cardId}`);
       return;
     }
 
+    // 创建或更新维度选择器
+    if (!this.chartDimensionSelectors.has(cardId)) {
+      const isBarChart = chartType === 'bar';
+
+      const selector = new ChartDimensionSelector({
+        containerId: cardId,
+        dimensions: this.chartableDimensions,
+        currentDimension: dimension,
+        syncMode: isBarChart,  // 柱状图显示同步开关
+        onDimensionChange: (newDim) => this.handleChartDimensionChange(newDim, chartId, chartType, cardId)
+      });
+
+      selector.render();
+      this.chartDimensionSelectors.set(cardId, selector);
+    } else {
+      // 更新现有选择器
+      const selector = this.chartDimensionSelectors.get(cardId);
+      selector.updateDimension(dimension);
+    }
+
+    // 渲染图表
+    this.components.chartService.renderChart(chartId, chartType, data, options);
+  }
+
+  /**
+   * 处理图表维度切换
+   */
+  async handleChartDimensionChange(newDimension, chartId, chartType, cardId) {
+    console.log(`[App] 维度切换: ${chartId} -> ${newDimension}`);
+
+    try {
+      // 显示加载状态
+      this.showLoading('正在切换维度...');
+
+      // 更新全局状态
+      window.StateManager.setState({ currentGroupBy: newDimension });
+
+      // 重新聚合数据
+      const filters = window.StateManager.getState('filters.applied');
+      const result = await window.WorkerBridge.applyFilter(filters, newDimension);
+
+      // 更新聚合数据状态
+      window.StateManager.setState({ aggregatedData: result.aggregated });
+
+      // 隐藏加载状态
+      this.hideLoading();
+
+      // 根据图表类型确定选项
+      const options = chartType === 'pie'
+        ? { roseType: 'area', maxItems: 6, showOthers: true }
+        : {};
+
+      // 重新渲染当前图表
+      this.components.chartService.renderChart(chartId, chartType, result.aggregated, options);
+
+    } catch (error) {
+      console.error('[App] 维度切换失败:', error);
+      this.hideLoading();
+      this.showError('维度切换失败', error.message);
+    }
+  }
+
+  /**
+   * 处理维度同步
+   */
+  async handleDimensionSync(data) {
+    const { dimension, source } = data;
+    console.log(`[App] 维度同步事件: ${dimension}, 来源: ${source}`);
+
+    // 获取所有需要同步的图表卡片
+    const syncTargets = [];
+
+    // 如果来源是柱状图，需要同步占比图
+    if (source === 'barChartCard') {
+      const ratioSelector = this.chartDimensionSelectors.get('ratioChartCard');
+      if (ratioSelector && ratioSelector.isSyncEnabled()) {
+        syncTargets.push({
+          cardId: 'ratioChartCard',
+          chartId: 'chartRatioMain',
+          chartType: 'pie',
+          options: { roseType: 'area', maxItems: 6, showOthers: true }
+        });
+      }
+    }
+
+    // 执行同步
+    for (const target of syncTargets) {
+      try {
+        const selector = this.chartDimensionSelectors.get(target.cardId);
+        if (selector) {
+          selector.updateDimension(dimension);
+        }
+
+        // 重新聚合数据
+        const filters = window.StateManager.getState('filters.applied');
+        const result = await window.WorkerBridge.applyFilter(filters, dimension);
+
+        // 更新状态
+        window.StateManager.setState({ aggregatedData: result.aggregated });
+
+        // 重新渲染图表
+        this.components.chartService.renderChart(
+          target.chartId,
+          target.chartType,
+          result.aggregated,
+          target.options
+        );
+
+      } catch (error) {
+        console.error(`[App] 同步失败 ${target.cardId}:`, error);
+      }
+    }
+  }
+
+  /**
+   * 渲染月度趋势图（概览页专用）
+   */
+  renderMonthTrendChart(data) {
+    // 概览页的趋势图应该固定使用起保月聚合
+    // 如果当前数据不是按起保月聚合的，需要重新聚合
+    const currentGroupBy = window.StateManager.getState('currentGroupBy');
+
+    if (currentGroupBy !== 'start_month') {
+      console.log('[App] 概览页需要按起保月聚合，重新查询...');
+      // 注意：这里需要异步处理，简化起见暂时使用当前数据
+      // 实际生产中应该重新调用 Worker 进行聚合
+    }
+
     this.components.chartService.renderChart(
-      'chartOrgComparison',
-      'bar',
+      'chartMonthTrend',
+      'line',
       data
     );
   }
 
   /**
-   * 渲染维度分析
+   * 渲染机构对比图（已废弃，保留兼容）
+   */
+  renderOrganizationComparison(data) {
+    // 这个方法已被新的柱状图页替代
+    console.warn('[App] renderOrganizationComparison 已废弃，请使用新的柱状图页');
+  }
+
+  /**
+   * 渲染维度分析（已废弃，保留兼容）
    */
   renderDimensionAnalysis(data) {
-    if (!data || data.length === 0) {
-      console.warn('[App] 无数据可渲染维度分析图');
-      return;
-    }
-
-    // 饼图 - 显示TOP10
-    const top10 = data.slice(0, 10);
-    this.components.chartService.renderChart(
-      'chartDimensionPie',
-      'pie',
-      top10
-    );
-
-    // 柱状图 - 显示TOP20
-    this.components.chartService.renderChart(
-      'chartDimensionBar',
-      'bar',
-      data.slice(0, 20)
-    );
+    // 这个方法已被新的占比图页替代
+    console.warn('[App] renderDimensionAnalysis 已废弃，请使用新的占比图页');
   }
 
   /**

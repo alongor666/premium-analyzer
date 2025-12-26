@@ -182,6 +182,37 @@
   color: var(--text-primary);
 }
 
+.dropdown-actions {
+  display: flex;
+  gap: var(--spacing-xs);
+  align-items: center;
+}
+
+.btn-xs {
+  padding: 4px 8px;
+  font-size: 12px;
+  border: 1px solid var(--border-medium);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  color: var(--text-primary);
+}
+
+.btn-xs:hover {
+  background: var(--bg-hover);
+  border-color: var(--primary-blue);
+}
+
+.btn-invert {
+  color: var(--primary-blue);
+  border-color: var(--primary-blue);
+}
+
+.btn-invert:hover {
+  background: rgba(0, 112, 192, 0.1);
+}
+
 .btn-close-dropdown {
   background: none;
   border: none;
@@ -190,6 +221,7 @@
   cursor: pointer;
   color: var(--text-muted);
   padding: 0;
+  margin-left: var(--spacing-xs);
 }
 
 .dropdown-options {
@@ -365,4 +397,61 @@
   .tab-navigator {
     flex-direction: column;
   }
+}
+
+/* 图表维度选择器样式 */
+.chart-dimension-selector {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-right: var(--spacing-md);
+  font-size: 14px;
+}
+
+.chart-dimension-selector label {
+  color: var(--text-secondary);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.dimension-select {
+  padding: 6px 12px;
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 14px;
+  cursor: pointer;
+  min-width: 150px;
+  transition: all var(--transition-fast);
+}
+
+.dimension-select:hover {
+  border-color: var(--primary-blue);
+}
+
+.dimension-select:focus {
+  outline: none;
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 2px rgba(0, 112, 192, 0.1);
+}
+
+.sync-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  user-select: none;
+}
+
+.sync-toggle input[type="checkbox"] {
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+}
+
+.sync-toggle:hover {
+  color: var(--text-primary);
 }
