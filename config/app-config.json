@@ -1,0 +1,33 @@
+{
+  "app": {
+    "name": "保费收入多维度分析系统",
+    "version": "1.0.0-mvp",
+    "theme": "mckinsey"
+  },
+  "upload": {
+    "maxFileSize": 10485760,
+    "allowedTypes": [".csv", ".xlsx", ".xls"],
+    "encoding": "utf-8"
+  },
+  "performance": {
+    "workerTimeout": 30000,
+    "chartDebounce": 300,
+    "maxDataPoints": 1000
+  },
+  "ui": {
+    "defaultTab": "overview",
+    "defaultGroupBy": "third_level_organization",
+    "chartHeight": 400,
+    "animationDuration": 500
+  },
+  "export": {
+    "fileName": "保费分析_{date}.{ext}",
+    "csvDelimiter": ",",
+    "csvEncoding": "utf-8-bom"
+  },
+  "storage": {
+    "enabled": false,
+    "key": "premium_analyzer_state",
+    "ttl": 86400000
+  }
+}

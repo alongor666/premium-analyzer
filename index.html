@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>保费收入多维度分析系统</title>
+
+  <!-- CSS样式 -->
+  <link rel="stylesheet" href="css/themes.css">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+  <!-- 顶部标题栏 -->
+  <header class="app-header">
+    <div class="header-content">
+      <h1 class="app-title">保费收入多维度分析系统</h1>
+      <div class="header-meta">
+        <span class="version">v1.0.0-MVP</span>
+        <span class="data-info" id="dataInfo" style="display: none;">
+          已加载 <strong id="dataCount">0</strong> 条数据
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主容器 -->
+  <main class="main-container">
+    <!-- 文件上传区域（初始显示） -->
+    <section id="uploadSection" class="upload-section">
+      <div class="upload-area" id="uploadArea">
+        <div class="upload-icon">📊</div>
+        <h2 class="upload-title">上传数据文件</h2>
+        <p class="upload-desc">拖拽Excel或CSV文件到此处，或点击选择文件</p>
+        <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" hidden>
+        <button class="btn btn-primary" id="selectFileBtn">选择文件</button>
+        <div class="upload-hint">
+          支持格式：.csv, .xlsx, .xls | 最大10MB
+        </div>
+      </div>
+
+      <!-- 加载状态 -->
+      <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+        <div class="loading-content">
+          <div class="loading-spinner"></div>
+          <p class="loading-text" id="loadingText">正在解析文件...</p>
+          <div class="progress-bar">
+            <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
+          </div>
+          <p class="loading-progress" id="loadingProgress">0%</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 仪表盘区域（数据加载后显示） -->
+    <section id="dashboardSection" class="dashboard-section" style="display: none;">
+      <!-- 筛选器面板 -->
+      <aside class="filter-panel">
+        <div class="panel-header">
+          <h3 class="panel-title">数据筛选</h3>
+          <div class="panel-actions">
+            <button class="btn btn-sm btn-primary" id="applyFilterBtn">应用筛选</button>
+            <button class="btn btn-sm btn-secondary" id="clearFilterBtn">清空</button>
+          </div>
+        </div>
+
+        <!-- 维度筛选器容器 -->
+        <div class="dimension-selectors" id="dimensionSelectors">
+          <!-- 将由dimension-selector.js动态渲染 -->
+        </div>
+
+        <!-- 已应用的筛选标签 -->
+        <div class="applied-filters" id="appliedFilters">
+          <div class="filter-tags-label">已应用筛选：</div>
+          <div class="filter-tags" id="filterTags">
+            <!-- 动态渲染筛选标签 -->
+          </div>
+        </div>
+      </aside>
+
+      <!-- 主内容区 -->
+      <div class="content-area">
+        <!-- 标签页导航 -->
+        <nav class="tab-navigator" id="tabNavigator">
+          <button class="tab-item active" data-tab="overview">概览分析</button>
+          <button class="tab-item" data-tab="organization">机构对比</button>
+          <button class="tab-item" data-tab="dimension">维度分析</button>
+          <button class="tab-item" data-tab="detail">明细数据</button>
+        </nav>
+
+        <!-- 概览分析页 -->
+        <div class="tab-content active" id="tabOverview">
+          <!-- 指标卡片区 -->
+          <div class="metrics-grid" id="metricsGrid">
+            <!-- 由metric-card.js动态渲染 -->
+          </div>
+
+          <!-- 图表区 -->
+          <div class="charts-container">
+            <!-- 月度趋势图 -->
+            <div class="chart-card">
+              <div class="chart-header">
+                <h3 class="chart-title">月度保费趋势</h3>
+                <div class="chart-actions">
+                  <button class="btn-icon" title="刷新">🔄</button>
+                </div>
+              </div>
+              <div class="chart-canvas" id="chartMonthTrend" style="height: 400px;"></div>
+            </div>
+
+            <!-- TOP5机构柱状图 -->
+            <div class="chart-card">
+              <div class="chart-header">
+                <h3 class="chart-title">TOP5机构保费排名</h3>
+                <div class="chart-actions">
+                  <button class="btn-icon" title="刷新">🔄</button>
+                </div>
+              </div>
+              <div class="chart-canvas" id="chartTopOrganizations" style="height: 400px;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 机构对比页 -->
+        <div class="tab-content" id="tabOrganization">
+          <div class="charts-container">
+            <div class="chart-card">
+              <div class="chart-header">
+                <h3 class="chart-title">机构保费对比</h3>
+              </div>
+              <div class="chart-canvas" id="chartOrgComparison" style="height: 500px;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 维度分析页 -->
+        <div class="tab-content" id="tabDimension">
+          <div class="dimension-analysis-grid">
+            <div class="chart-card">
+              <div class="chart-header">
+                <h3 class="chart-title">维度分布饼图</h3>
+              </div>
+              <div class="chart-canvas" id="chartDimensionPie" style="height: 400px;"></div>
+            </div>
+            <div class="chart-card">
+              <div class="chart-header">
+                <h3 class="chart-title">维度排名柱状图</h3>
+              </div>
+              <div class="chart-canvas" id="chartDimensionBar" style="height: 400px;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 明细数据页 -->
+        <div class="tab-content" id="tabDetail">
+          <div class="table-container">
+            <div class="table-header">
+              <h3>数据明细表</h3>
+              <button class="btn btn-sm btn-primary" id="exportBtn">导出数据</button>
+            </div>
+            <div id="dataTable" class="data-table"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 错误提示模态框 -->
+  <div class="modal" id="errorModal" style="display: none;">
+    <div class="modal-overlay"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="errorTitle">错误</h3>
+        <button class="modal-close" id="modalCloseBtn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p id="errorMessage"></p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" id="errorConfirmBtn">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast通知 -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- 第三方库（CDN） -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+
+  <!-- 核心模块 -->
+  <script src="js/core/event-bus.js"></script>
+  <script src="js/core/state-manager.js"></script>
+  <script src="js/core/worker-bridge.js"></script>
+
+  <!-- 工具模块 -->
+  <script src="js/utils/logger.js"></script>
+  <script src="js/utils/error-handler.js"></script>
+  <script src="js/utils/formatters.js"></script>
+  <script src="js/utils/validators.js"></script>
+  <script src="js/utils/storage.js"></script>
+  <script src="js/utils/exporter.js"></script>
+  <script src="js/utils/shortcuts.js"></script>
+
+  <!-- UI组件 -->
+  <script src="js/components/file-uploader.js"></script>
+  <script src="js/components/dimension-selector.js"></script>
+  <script src="js/components/metric-card.js"></script>
+
+  <!-- 服务模块 -->
+  <script src="js/services/chart-service.js"></script>
+
+  <!-- 应用入口 -->
+  <script src="js/app.js"></script>
+</body>
+</html>

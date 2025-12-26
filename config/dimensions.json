@@ -1,0 +1,100 @@
+{
+  "dimensions": [
+    {
+      "key": "third_level_organization",
+      "label": "三级机构",
+      "csvFields": ["三级机构", "机构名称", "organization", "三级机构名称"],
+      "color": "#0070c0",
+      "group": 1,
+      "sortable": true,
+      "searchable": true
+    },
+    {
+      "key": "start_month",
+      "label": "起保月",
+      "csvFields": ["起保月", "保单月份", "month", "起保日期"],
+      "color": "#00b050",
+      "group": 2,
+      "type": "time",
+      "format": "YYYY-MM",
+      "sortable": true
+    },
+    {
+      "key": "customer_category",
+      "label": "客户类别",
+      "csvFields": ["客户类别", "车辆类型", "客户分类", "业务类型"],
+      "color": "#ff0000",
+      "group": 3,
+      "searchable": true,
+      "sortable": true
+    },
+    {
+      "key": "energy_type",
+      "label": "能源类型",
+      "csvFields": ["能源类型", "是否新能源", "新能源", "能源", "energy_type"],
+      "color": "#5b9bd5",
+      "group": 4,
+      "sortable": true,
+      "searchable": false
+    },
+    {
+      "key": "coverage_type",
+      "label": "险别组合",
+      "csvFields": ["险别组合", "险别", "保险类型", "coverage_type"],
+      "color": "#a9d18e",
+      "group": 3,
+      "sortable": true,
+      "searchable": false
+    },
+    {
+      "key": "is_transferred_vehicle",
+      "label": "是否过户车",
+      "csvFields": ["是否过户车", "过户车", "是否过户", "transfer_status"],
+      "color": "#ffd966",
+      "group": 4,
+      "sortable": true,
+      "searchable": false
+    },
+    {
+      "key": "renewal_status",
+      "label": "续保状态",
+      "csvFields": ["续保状态", "是否续保", "续保", "renewal"],
+      "color": "#f4b183",
+      "group": 4,
+      "sortable": true,
+      "searchable": false
+    },
+    {
+      "key": "insurance_type",
+      "label": "险种",
+      "csvFields": ["险种", "保险险种", "险种类型", "insurance"],
+      "color": "#c5e0b4",
+      "group": 3,
+      "sortable": true,
+      "searchable": true
+    },
+    {
+      "key": "terminal_source",
+      "label": "终端来源",
+      "csvFields": ["终端来源", "渠道", "来源", "source", "channel"],
+      "color": "#8faadc",
+      "group": 5,
+      "sortable": true,
+      "searchable": true
+    }
+  ],
+  "metric": {
+    "key": "premium",
+    "label": "保费收入",
+    "csvFields": ["保费收入", "保费", "premium", "签单保费", "保险费"],
+    "unit": "万元",
+    "format": "0,0.00",
+    "aggregation": "sum"
+  },
+  "metadata": {
+    "version": "2.0.0",
+    "created": "2025-12-26",
+    "updated": "2025-12-26",
+    "description": "完整版配置：9个维度（三级机构、起保月、客户类别、能源类型、险别组合、是否过户车、续保状态、险种、终端来源）"
+  }
+}

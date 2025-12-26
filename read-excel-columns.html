@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>读取Excel列名</title>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+  <h1>Excel列名读取工具</h1>
+  <input type="file" id="fileInput" accept=".xlsx,.xls">
+  <div id="output" style="margin-top: 20px; font-family: monospace;"></div>
+
+  <script>
+    document.getElementById('fileInput').addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+        const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+
+        const headers = jsonData[0];
+        const output = document.getElementById('output');
+
+        output.innerHTML = '<h2>Excel文件列名：</h2>';
+        output.innerHTML += '<pre>' + JSON.stringify(headers, null, 2) + '</pre>';
+
+        output.innerHTML += '<h3>前5行数据样例：</h3>';
+        output.innerHTML += '<pre>' + JSON.stringify(jsonData.slice(0, 5), null, 2) + '</pre>';
+      };
+      reader.readAsArrayBuffer(file);
+    });
+  </script>
+</body>
+</html>

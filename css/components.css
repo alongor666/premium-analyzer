@@ -1,0 +1,368 @@
+/**
+ * 组件样式
+ * 参考：autowrKPI/css/dashboard.css
+ */
+
+/* 指标卡片 */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.metric-card {
+  background: var(--bg-primary);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-normal);
+  border-left: 4px solid var(--border-medium);
+}
+
+.metric-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.metric-card.primary {
+  border-left-color: var(--primary-red);
+}
+
+.metric-card.info {
+  border-left-color: var(--info);
+}
+
+.metric-card.success {
+  border-left-color: var(--success);
+}
+
+.metric-title {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-sm);
+}
+
+.metric-value {
+  font-size: 28px;
+  font-weight: bold;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.metric-subtext {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.metric-trend {
+  font-size: 14px;
+  font-weight: 500;
+  margin-top: var(--spacing-sm);
+}
+
+.metric-trend.positive {
+  color: var(--success);
+}
+
+.metric-trend.negative {
+  color: var(--danger);
+}
+
+/* 图表容器 */
+.charts-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.chart-card {
+  background: var(--bg-primary);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+  padding-bottom: var(--spacing-md);
+  border-bottom: 2px solid var(--primary-red);
+}
+
+.chart-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.chart-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.chart-canvas {
+  width: 100%;
+}
+
+/* 维度筛选器 */
+.dimension-selectors {
+  margin-bottom: var(--spacing-lg);
+}
+
+.dimension-item {
+  position: relative;
+  margin-bottom: var(--spacing-md);
+}
+
+.dimension-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  background: var(--bg-primary);
+  border-left: 3px solid var(--primary-blue);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.dimension-header:hover {
+  background: var(--bg-hover);
+}
+
+.dimension-label {
+  font-weight: 500;
+  color: var(--text-primary);
+  flex: 1;
+}
+
+.selected-count {
+  background: var(--primary-blue);
+  color: var(--text-white);
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  margin: 0 var(--spacing-sm);
+}
+
+.dropdown-icon {
+  color: var(--text-muted);
+  font-size: 12px;
+  transition: transform var(--transition-fast);
+}
+
+/* 下拉面板 */
+.dimension-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--bg-primary);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-lg);
+  z-index: 1000;
+  max-height: 400px;
+  display: flex;
+  flex-direction: column;
+}
+
+.dropdown-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-md);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.dropdown-title {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.btn-close-dropdown {
+  background: none;
+  border: none;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--text-muted);
+  padding: 0;
+}
+
+.dropdown-options {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-sm);
+}
+
+.option-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast);
+}
+
+.option-item:hover {
+  background: var(--bg-hover);
+}
+
+.option-item.select-all {
+  font-weight: 500;
+  border-bottom: 1px solid var(--border-light);
+  margin-bottom: var(--spacing-xs);
+}
+
+.option-item input[type="checkbox"] {
+  margin-right: var(--spacing-sm);
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+}
+
+.options-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+/* 滚动条样式 */
+.options-list::-webkit-scrollbar,
+.dropdown-options::-webkit-scrollbar {
+  width: 6px;
+}
+
+.options-list::-webkit-scrollbar-track,
+.dropdown-options::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+.options-list::-webkit-scrollbar-thumb,
+.dropdown-options::-webkit-scrollbar-thumb {
+  background: var(--border-medium);
+  border-radius: 3px;
+}
+
+.options-list::-webkit-scrollbar-thumb:hover,
+.dropdown-options::-webkit-scrollbar-thumb:hover {
+  background: var(--border-dark);
+}
+
+/* 已应用筛选 */
+.applied-filters {
+  margin-top: var(--spacing-lg);
+  padding-top: var(--spacing-lg);
+  border-top: 1px solid var(--border-light);
+}
+
+.filter-tags-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-sm);
+}
+
+.filter-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.filter-tag {
+  display: inline-flex;
+  align-items: center;
+  background: var(--bg-secondary);
+  border-left: 3px solid var(--primary-blue);
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  gap: var(--spacing-xs);
+}
+
+.filter-tag-label {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.filter-tag-values {
+  color: var(--text-secondary);
+}
+
+.filter-tag-remove {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  padding: 0;
+  margin-left: var(--spacing-xs);
+}
+
+.filter-tag-remove:hover {
+  color: var(--danger);
+}
+
+.no-filters {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* 维度颜色标识（参考autowrKPI） */
+.dimension-item[data-key="third_level_organization"] .dimension-header {
+  border-left-color: #0070c0;
+}
+
+.dimension-item[data-key="start_month"] .dimension-header {
+  border-left-color: #00b050;
+}
+
+.dimension-item[data-key="customer_category"] .dimension-header {
+  border-left-color: #ff0000;
+}
+
+.filter-tag[data-key="third_level_organization"] {
+  border-left-color: #0070c0;
+}
+
+.filter-tag[data-key="start_month"] {
+  border-left-color: #00b050;
+}
+
+.filter-tag[data-key="customer_category"] {
+  border-left-color: #ff0000;
+}
+
+/* 响应式设计 */
+@media (max-width: 1024px) {
+  .dashboard-section {
+    flex-direction: column;
+  }
+
+  .filter-panel {
+    flex: 1;
+    position: static;
+  }
+
+  .metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .header-content {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+
+  .tab-navigator {
+    flex-direction: column;
+  }
+}
