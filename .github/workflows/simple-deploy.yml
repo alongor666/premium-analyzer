@@ -1,0 +1,44 @@
+name: 简化部署到GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+      
+    steps:
+    - name: 检出代码
+      uses: actions/checkout@v4
+      
+    - name: 设置Pages
+      uses: actions/configure-pages@v4
+      
+    - name: 创建静态文件目录
+      run: |
+        mkdir -p _site
+        cp -r index.html css js config docs read-excel-columns.html README.md _site/
+        
+    - name: 上传构建产物
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: _site
+        
+    - name: 部署到GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
