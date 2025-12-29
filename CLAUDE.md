@@ -185,46 +185,26 @@ WorkerBridge.sendMessage('parse-csv', data, (result) => {
 
 ### 5. Data Reload Flow (重新导入数据)
 
-**User-Initiated Data Replacement** (available after initial data load):
+**Technical workflow for state reset**:
 
 ```
-Header "重新导入数据" Button → Confirmation Dialog → State Cleanup → Show Upload Area
+User Action → Confirmation → StateManager.clear() → UI Reset → Upload State
 ```
 
-**State Transitions**:
-1. **Trigger**: User clicks "重新导入数据" button in header (visible after data loaded)
-2. **Confirmation**: Confirmation dialog warns about losing current analysis
-3. **State Cleanup**: Clears StateManager (rawData, globalStats, aggregatedData, dimensions, filters)
-4. **UI Reset**: Hides dashboard section, shows upload section, resets file input
-5. **Ready**: User can upload new data file
+**Implementation**:
+- **Method**: `app.js::reloadData()` (app.js:672-709)
+- **Trigger**: Button click event (index.html:23-25)
+- **State Cleanup**: Clears all StateManager data (rawData, globalStats, aggregatedData, filters)
+- **UI Reset**: Hides dashboard, shows upload section
+- **Documentation**: JSDoc in code, user guide in README.md
 
-**Implementation** (app.js:650-687):
-```javascript
-reloadData() {
-  // Confirm operation
-  const confirmed = confirm('确定要重新导入数据吗？\n\n当前的筛选和分析结果将会丢失。');
-  if (!confirmed) return;
+**Key Points**:
+- Confirmation dialog prevents accidental data loss
+- Complete state reset ensures clean application state
+- Button visibility controlled by `file-uploader.js::showDashboard()`
+- No EventBus events - direct DOM manipulation for simplicity
 
-  // Clear state
-  StateManager.setState({ rawData: null, globalStats: null, ... });
-
-  // Hide dashboard, show upload section
-  document.getElementById('dashboardSection').style.display = 'none';
-  document.getElementById('uploadSection').style.display = 'flex';
-
-  // Reset UI elements
-  document.getElementById('dataInfo').style.display = 'none';
-  document.getElementById('reloadDataBtn').style.display = 'none';
-  document.getElementById('fileInput').value = '';
-}
-```
-
-**UI Elements**:
-- **Button Location**: Header right side (index.html:23-25)
-- **Visibility**: Hidden initially, shown after data loads (file-uploader.js:144)
-- **Style**: Secondary button with 📂 icon
-
-**Why**: Allows users to analyze different datasets without page refresh, maintaining application state integrity.
+**Why**: Enables dataset switching without page refresh while maintaining state integrity.
 
 ---
 

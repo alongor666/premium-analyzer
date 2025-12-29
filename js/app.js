@@ -646,6 +646,28 @@ class PremiumAnalyzer {
 
   /**
    * 重新导入数据
+   *
+   * @description
+   * 清空所有应用状态并返回文件上传界面，允许用户上传新的数据文件。
+   * 此操作会清除所有已加载的数据、筛选条件和分析结果。
+   *
+   * @workflow
+   * 1. 显示确认对话框，提示用户将丢失当前结果
+   * 2. 清空 StateManager 中的所有数据状态
+   * 3. 隐藏仪表盘区域，显示上传区域
+   * 4. 重置所有 UI 元素（数据信息、按钮、文件输入）
+   *
+   * @fires None - 直接操作 DOM，不触发事件
+   *
+   * @example
+   * // 用户点击"重新导入数据"按钮
+   * reloadDataBtn.addEventListener('click', () => {
+   *   this.reloadData();
+   * });
+   *
+   * @see {@link file-uploader.js#showDashboard} 显示按钮的位置
+   * @see {@link CLAUDE.md#data-reload-flow} 完整工作流程说明
+   * @see {@link README.md#重新导入数据} 用户使用说明
    */
   reloadData() {
     // 确认操作
