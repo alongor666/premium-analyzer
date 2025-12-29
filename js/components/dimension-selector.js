@@ -32,6 +32,7 @@ class DimensionSelector {
 
   /**
    * 渲染单个维度筛选器
+   * 安全版本：使用escapeHtml防止XSS攻击
    */
   renderDimension(dimension) {
     const draftValues = window.StateManager.getState('filters')?.draft[dimension.key] || [];
@@ -42,17 +43,38 @@ class DimensionSelector {
       ? `<span class="selected-count">${selectedCount}</span>`
       : '';
 
+    // 转义维度标签（虽然来自配置，但为了安全一致性也转义）
+    const safeLabel = window.SecurityUtils?.escapeHtml(dimension.label) || dimension.label;
+    const safeKey = window.SecurityUtils?.escapeHtmlAttribute(dimension.key) || dimension.key;
+    const safeColor = window.SecurityUtils?.escapeHtmlAttribute(dimension.color) || dimension.color;
+
+    // 转义维度值（来自用户数据，必须转义）
+    const optionsHtml = availableValues.map(value => {
+      const safeValue = window.SecurityUtils?.escapeHtmlAttribute(value) || value;
+      const safeDisplayValue = window.SecurityUtils?.escapeHtml(value) || value;
+      const isChecked = draftValues.includes(value) ? 'checked' : '';
+
+      return `
+        <label class="option-item">
+          <input type="checkbox"
+                 value="${safeValue}"
+                 ${isChecked}>
+          <span>${safeDisplayValue}</span>
+        </label>
+      `;
+    }).join('');
+
     return `
-      <div class="dimension-item" data-key="${dimension.key}">
-        <div class="dimension-header" style="border-left-color: ${dimension.color}">
-          <span class="dimension-label">${dimension.label}</span>
+      <div class="dimension-item" data-key="${safeKey}">
+        <div class="dimension-header" style="border-left-color: ${safeColor}">
+          <span class="dimension-label">${safeLabel}</span>
           ${selectedCountHtml}
           <span class="dropdown-icon">▼</span>
         </div>
 
         <div class="dimension-dropdown" style="display: none;">
           <div class="dropdown-header">
-            <span class="dropdown-title">${dimension.label}</span>
+            <span class="dropdown-title">${safeLabel}</span>
             <div class="dropdown-actions">
               <button class="btn btn-xs btn-invert" data-action="invert-selection">反选</button>
               <button class="btn-close-dropdown">×</button>
@@ -65,14 +87,7 @@ class DimensionSelector {
               <span>全选 (${availableValues.length})</span>
             </label>
             <div class="options-list">
-              ${availableValues.map(value => `
-                <label class="option-item">
-                  <input type="checkbox"
-                         value="${value}"
-                         ${draftValues.includes(value) ? 'checked' : ''}>
-                  <span>${value}</span>
-                </label>
-              `).join('')}
+              ${optionsHtml}
             </div>
           </div>
         </div>
@@ -271,6 +286,7 @@ class DimensionSelector {
 
   /**
    * 渲染已应用的筛选标签
+   * 安全版本：使用escapeHtml防止XSS攻击
    */
   renderAppliedFilters() {
     const appliedFilters = window.StateManager.getState('filters')?.applied || [];
@@ -285,11 +301,19 @@ class DimensionSelector {
       const dimension = this.dimensionsConfig.find(d => d.key === filter.key);
       const color = dimension?.color || '#999';
 
+      // 转义所有动态内容
+      const safeKey = window.SecurityUtils?.escapeHtmlAttribute(filter.key) || filter.key;
+      const safeColor = window.SecurityUtils?.escapeHtmlAttribute(color) || color;
+      const safeLabel = window.SecurityUtils?.escapeHtml(dimension?.label || filter.key) || filter.key;
+      const safeValues = filter.values
+        .map(v => window.SecurityUtils?.escapeHtml(v) || v)
+        .join(', ');
+
       return `
-        <div class="filter-tag" data-key="${filter.key}" style="border-left-color: ${color}">
-          <span class="filter-tag-label">${dimension?.label || filter.key}:</span>
-          <span class="filter-tag-values">${filter.values.join(', ')}</span>
-          <button class="filter-tag-remove" data-key="${filter.key}">×</button>
+        <div class="filter-tag" data-key="${safeKey}" style="border-left-color: ${safeColor}">
+          <span class="filter-tag-label">${safeLabel}:</span>
+          <span class="filter-tag-values">${safeValues}</span>
+          <button class="filter-tag-remove" data-key="${safeKey}">×</button>
         </div>
       `;
     }).join('');

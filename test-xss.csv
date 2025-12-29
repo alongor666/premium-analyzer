@@ -1,0 +1,5 @@
+三级机构,起保月,客户类别,能源类型,险别组合,是否过户车,续保状态,险种,终端来源,保费收入
+<script>alert('XSS in organization')</script>,2025-01,正常客户,燃油车,综合险,否,新保,车损险,线上,10000
+天府新区,2025-02,<img src=x onerror="alert('XSS in customer')"),燃油车,综合险,否,续保,车损险,线上,15000
+高新开发区,2025-03,正常客户,<iframe src="javascript:alert('XSS')"></iframe>,综合险,否,续保,车损险,线下,12000
+"天府""onmouseover=""alert('XSS')",2025-01,正常客户,燃油车,<svg onload=alert('XSS')>,否,新保,三者险,线上,8000

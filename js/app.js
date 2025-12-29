@@ -512,6 +512,7 @@ class PremiumAnalyzer {
 
   /**
    * 渲染明细数据表格
+   * 安全版本：使用DOM API防止XSS攻击
    */
   renderDetailTable(data) {
     if (!data || data.length === 0) {
@@ -521,23 +522,55 @@ class PremiumAnalyzer {
 
     const tableContainer = document.getElementById('dataTable');
 
-    let html = '<table class="detail-table"><thead><tr>';
-    html += '<th>维度</th><th>保费收入（万元）</th><th>占比</th><th>记录数</th>';
-    html += '</tr></thead><tbody>';
+    // 清空容器
+    tableContainer.innerHTML = '';
+
+    // 创建表格元素
+    const table = document.createElement('table');
+    table.className = 'detail-table';
+
+    // 创建表头
+    const thead = document.createElement('thead');
+    const headerRow = document.createElement('tr');
+    ['维度', '保费收入（万元）', '占比', '记录数'].forEach(text => {
+      const th = document.createElement('th');
+      th.textContent = text;
+      headerRow.appendChild(th);
+    });
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+
+    // 创建表体
+    const tbody = document.createElement('tbody');
 
     data.forEach(row => {
-      const formattedPremium = (row.premium / 10000).toFixed(2);
-      const formattedRatio = (row.ratio * 100).toFixed(2) + '%';
-      html += `<tr>
-        <td>${row.dimension}</td>
-        <td>${formattedPremium}</td>
-        <td>${formattedRatio}</td>
-        <td>${row.count}</td>
-      </tr>`;
+      const tr = document.createElement('tr');
+
+      // 维度 - 使用textContent防止XSS
+      const dimCell = document.createElement('td');
+      dimCell.textContent = row.dimension;
+      tr.appendChild(dimCell);
+
+      // 保费收入（数值安全，无需转义）
+      const premiumCell = document.createElement('td');
+      premiumCell.textContent = (row.premium / 10000).toFixed(2);
+      tr.appendChild(premiumCell);
+
+      // 占比（数值安全，无需转义）
+      const ratioCell = document.createElement('td');
+      ratioCell.textContent = (row.ratio * 100).toFixed(2) + '%';
+      tr.appendChild(ratioCell);
+
+      // 记录数（数值安全，无需转义）
+      const countCell = document.createElement('td');
+      countCell.textContent = row.count;
+      tr.appendChild(countCell);
+
+      tbody.appendChild(tr);
     });
 
-    html += '</tbody></table>';
-    tableContainer.innerHTML = html;
+    table.appendChild(tbody);
+    tableContainer.appendChild(table);
   }
 
   /**

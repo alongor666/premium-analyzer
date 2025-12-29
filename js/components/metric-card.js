@@ -18,10 +18,17 @@ class MetricCard {
 
   /**
    * 创建单个卡片
+   * 安全版本：使用escapeHtml防止XSS攻击
    * @param {Object} metric - 指标数据
    */
   createCard(metric) {
     const { title, value, subtext, trend, status = 'default' } = metric;
+
+    // 转义所有文本内容（虽然主要来自计算和配置，但为了安全一致性）
+    const safeTitle = window.SecurityUtils?.escapeHtml(title) || title;
+    const safeValue = window.SecurityUtils?.escapeHtml(String(value)) || value;
+    const safeSubtext = subtext ? (window.SecurityUtils?.escapeHtml(subtext) || subtext) : '';
+    const safeStatus = window.SecurityUtils?.escapeHtmlAttribute(status) || status;
 
     const trendHtml = trend ? `
       <div class="metric-trend ${trend > 0 ? 'positive' : trend < 0 ? 'negative' : ''}">
@@ -29,12 +36,12 @@ class MetricCard {
       </div>
     ` : '';
 
-    const subtextHtml = subtext ? `<div class="metric-subtext">${subtext}</div>` : '';
+    const subtextHtml = safeSubtext ? `<div class="metric-subtext">${safeSubtext}</div>` : '';
 
     return `
-      <div class="metric-card ${status}">
-        <div class="metric-title">${title}</div>
-        <div class="metric-value">${value}</div>
+      <div class="metric-card ${safeStatus}">
+        <div class="metric-title">${safeTitle}</div>
+        <div class="metric-value">${safeValue}</div>
         ${subtextHtml}
         ${trendHtml}
       </div>
