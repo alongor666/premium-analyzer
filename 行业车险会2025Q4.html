@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>行业车险会2025Q4</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* 自定义动画 */
+        @keyframes fade-in {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slide-in-from-bottom-4 {
+            from { 
+                opacity: 0;
+                transform: translateY(1rem);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-in {
+            animation-fill-mode: both;
+        }
+        
+        .fade-in {
+            animation-name: fade-in;
+        }
+        
+        .duration-500 {
+            animation-duration: 500ms;
+        }
+        
+        .slide-in-from-bottom-4 {
+            animation-name: slide-in-from-bottom-4;
+        }
+        
+        /* 自定义样式 */
+        .prose {
+            color: rgb(71 85 105);
+            max-width: none;
+        }
+        
+        .prose h3 {
+            font-weight: 700;
+            color: rgb(15 23 42);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            font-size: 1.25rem;
+            line-height: 1.75rem;
+        }
+        
+        .prose h4 {
+            font-weight: 700;
+            color: rgb(15 23 42);
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            font-size: 1.125rem;
+            line-height: 1.5rem;
+        }
+        
+        .prose p {
+            color: rgb(71 85 105);
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .prose ul {
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+        
+        .prose li {
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+            color: rgb(71 85 105);
+        }
+        
+        .selection\\:bg-blue-100 ::selection {
+            background-color: rgb(219 234 254);
+        }
+        
+        /* 悬停效果 */
+        .hover\\:shadow-md:hover {
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        
+        .hover\\:border-slate-300:hover {
+            border-color: rgb(203 213 225);
+        }
+        
+        .transition-colors {
+            transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+            transition-duration: 150ms;
+        }
+        
+        .transition-shadow {
+            transition-property: box-shadow;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+            transition-duration: 150ms;
+        }
+        
+        .transition-all {
+            transition-property: all;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+            transition-duration: 150ms;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-[#f8fafc] text-slate-800 font-sans selection:bg-blue-100 pb-12">
+    
+    <!-- 顶部导航与标题 -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-10 shadow-sm">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="bg-blue-600 text-white p-1.5 rounded font-bold text-xs tracking-tighter">SC-INS</div>
+                <div>
+                    <h1 class="text-lg font-bold text-slate-900">行业车险会2025Q4纪要</h1>
+                    <div class="text-[10px] text-slate-500 font-medium">基于2025Q4行业会议纪要</div>
+                </div>
+            </div>
+            <div class="flex gap-1 bg-slate-100 p-1 rounded-lg">
+                <button 
+                    id="strategy-tab"
+                    onclick="switchTab('strategy')"
+                    class="px-4 py-1.5 rounded-md text-sm font-medium transition-all bg-white text-slate-900 shadow-sm"
+                >
+                    核心看板
+                </button>
+                <button 
+                    id="full-record-tab"
+                    onclick="switchTab('full-record')"
+                    class="px-4 py-1.5 rounded-md text-sm font-medium transition-all text-slate-500 hover:text-slate-700"
+                >
+                    全量纪要
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- 核心看板内容 -->
+        <div id="strategy-content" class="space-y-8 animate-in fade-in duration-500">
+            
+            <!-- 第一部分：市场体征 (Vitals) -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="p-4 bg-slate-50 rounded-lg border border-slate-100">
+                    <div class="text-xs text-slate-500 font-medium uppercase tracking-wider mb-1">行业承保利润</div>
+                    <div class="flex items-baseline gap-2">
+                        <div class="text-2xl font-bold text-slate-900">36.47亿</div>
+                        <div class="text-xs font-medium px-1.5 py-0.5 rounded text-emerald-700 bg-emerald-100">
+                            +27% (全国No.1)
+                        </div>
+                    </div>
+                    <div class="text-xs text-slate-400 mt-2 leading-snug">监管处认为：利润过高、未让利于民。</div>
+                </div>
+                
+                <div class="p-4 bg-slate-50 rounded-lg border border-slate-100">
+                    <div class="text-xs text-slate-500 font-medium uppercase tracking-wider mb-1">综合成本率</div>
+                    <div class="flex items-baseline gap-2">
+                        <div class="text-2xl font-bold text-slate-900">91.1%</div>
+                        <div class="text-xs font-medium px-1.5 py-0.5 rounded text-emerald-700 bg-emerald-100">
+                            -5.35% vs全国
+                        </div>
+                    </div>
+                    <div class="text-xs text-slate-400 mt-2 leading-snug">优于全国平均水平，经营效益良好但结构失衡。</div>
+                </div>
+                
+                <div class="p-4 bg-slate-50 rounded-lg border border-slate-100">
+                    <div class="text-xs text-slate-500 font-medium uppercase tracking-wider mb-1">飞检·引导拒访</div>
+                    <div class="flex items-baseline gap-2">
+                        <div class="text-2xl font-bold text-slate-900">43.3%</div>
+                        <div class="text-xs font-medium px-1.5 py-0.5 rounded text-rose-700 bg-rose-100">
+                            同比上升
+                        </div>
+                    </div>
+                    <div class="text-xs text-slate-400 mt-2 leading-snug">监管点名批评。严禁诱导删聊天记录、拒访。</div>
+                </div>
+                
+                <div class="p-4 bg-slate-50 rounded-lg border border-slate-100">
+                    <div class="text-xs text-slate-500 font-medium uppercase tracking-wider mb-1">费用率监测</div>
+                    <div class="flex items-baseline gap-2">
+                        <div class="text-2xl font-bold text-slate-900">14%-26%</div>
+                        <div class="text-xs font-medium px-1.5 py-0.5 rounded text-rose-700 bg-rose-100">
+                            超标6-10pt
+                        </div>
+                    </div>
+                    <div class="text-xs text-slate-400 mt-2 leading-snug">普遍超标。3月将启动回溯，费用真实性面临严查。</div>
+                </div>
+            </div>
+
+            <!-- 第二部分：2026 政策红线 -->
+            <section>
+                <div class="flex items-center gap-3 mb-5 mt-8 border-b border-slate-200 pb-3">
+                    <div class="p-2 bg-slate-900 rounded-lg shadow-sm">
+                        <i data-lucide="target" size="20" class="text-white"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-900 leading-tight">2026 自律规则调整·核心参数</h2>
+                        <p class="text-xs text-slate-500 mt-0.5">生效日期：2026年1月1日 | 执行重点：春节后管控</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    
+                    <!-- 左侧：管控节奏与红线 -->
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden border-l-4 border-l-rose-500">
+                        <div class="bg-rose-50 px-4 py-3 border-b border-rose-100 flex justify-between items-center">
+                            <span class="font-bold text-rose-800 text-sm flex items-center gap-2">
+                                <i data-lucide="siren" size="16"></i> 生死红线：中小公司管控
+                            </span>
+                        </div>
+                        <div class="p-4 space-y-3">
+                            <div class="flex gap-3 items-start p-3 rounded-lg bg-white border border-slate-100 hover:border-slate-300 transition-colors">
+                                <div class="mt-0.5 min-w-1.5 h-1.5 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.4)]"></div>
+                                <div>
+                                    <div class="text-sm font-bold text-slate-800">监测时点：2月24日 (春节后首日)</div>
+                                    <div class="text-sm text-slate-600 mt-1 leading-relaxed">避开春节波动，从2月24日开始提取数据监测。但<strong>考核周期仍从1月1日起算</strong>。</div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex gap-3 items-start p-3 rounded-lg bg-white border border-slate-100 hover:border-slate-300 transition-colors">
+                                <div class="mt-0.5 min-w-1.5 h-1.5 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.4)]"></div>
+                                <div>
+                                    <div class="text-sm font-bold text-slate-800">累计增速超限惩罚升级</div>
+                                    <div class="text-sm text-slate-600 mt-1 leading-relaxed">若2月24日监测超限，仅给<strong>一次</strong>回调机会。若未到位，<strong>直接取消中小主体"滚动两周"政策</strong>，改为最严厉的"累计增速"模式。</div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex gap-3 items-start p-3 rounded-lg bg-white border border-slate-100 hover:border-slate-300 transition-colors">
+                                <div class="mt-0.5 min-w-1.5 h-1.5 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.4)]"></div>
+                                <div>
+                                    <div class="text-sm font-bold text-slate-800">档位动态调整</div>
+                                    <div class="text-sm text-slate-600 mt-1 leading-relaxed">每季度根据上一季度末的累计份额更新公司档位。</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 右侧：业务规则微调 -->
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden border-l-4 border-l-blue-500">
+                        <div class="bg-blue-50 px-4 py-3 border-b border-blue-100 flex justify-between items-center">
+                            <span class="font-bold text-blue-800 text-sm flex items-center gap-2">
+                                <i data-lucide="scale" size="16"></i> 业务参数微调
+                            </span>
+                        </div>
+                        <div class="p-4 space-y-3">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="bg-slate-50 p-3 rounded border border-slate-100">
+                                    <div class="text-xs text-slate-500 mb-1">新能源豁免阈值</div>
+                                    <div class="font-bold text-slate-800">5单 → 10单</div>
+                                </div>
+                                <div class="bg-slate-50 p-3 rounded border border-slate-100">
+                                    <div class="text-xs text-slate-500 mb-1">新能源营运交商比</div>
+                                    <div class="font-bold text-slate-800">阈值 0.95</div>
+                                    <div class="text-[10px] text-slate-400 text-rose-600">低于此值将被监管，措施待定</div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex gap-3 items-start p-3 rounded-lg bg-white border border-slate-100 hover:border-slate-300 transition-colors">
+                                <div class="mt-0.5 min-w-1.5 h-1.5 rounded-full bg-blue-500"></div>
+                                <div>
+                                    <div class="text-sm font-bold text-slate-800">增值服务费用挂钩</div>
+                                    <div class="text-sm text-slate-600 mt-1 leading-relaxed">条款外增值服务：<strong>有金额的按实际金额计算；无金额的按2个费用点计入费用率</strong>作为飞检标准。</div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex gap-3 items-start p-3 rounded-lg bg-white border border-slate-100 hover:border-slate-300 transition-colors">
+                                <div class="mt-0.5 min-w-1.5 h-1.5 rounded-full bg-blue-500"></div>
+                                <div>
+                                    <div class="text-sm font-bold text-slate-800">拒访惩戒量化 (删记录=引导拒访)</div>
+                                    <div class="grid grid-cols-3 gap-2 mt-1 text-xs text-slate-600">
+                                       <div class="bg-white p-1 rounded border text-center">
+                                         <div class="font-bold text-slate-900">+200笔</div>
+                                         <div class="scale-90">人保/平安</div>
+                                       </div>
+                                       <div class="bg-white p-1 rounded border text-center">
+                                         <div class="font-bold text-slate-900">+100笔</div>
+                                         <div class="scale-90">二至四档/七档</div>
+                                       </div>
+                                       <div class="bg-white p-1 rounded border text-center">
+                                         <div class="font-bold text-red-600">+50笔</div>
+                                         <div class="scale-90 text-red-600">华安及其余公司</div>
+                                       </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 第三部分：监管路线图 -->
+            <section>
+                <div class="flex items-center gap-3 mb-5 mt-8 border-b border-slate-200 pb-3">
+                    <div class="p-2 bg-slate-900 rounded-lg shadow-sm">
+                        <i data-lucide="shield" size="20" class="text-white"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-900 leading-tight">监管风向与行动路线</h2>
+                        <p class="text-xs text-slate-500 mt-0.5">讲话人：监管副处长 | 核心基调：报行合一不动摇，惩戒提级</p>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                    <div class="flex flex-col md:flex-row gap-8">
+                        <!-- 监管态度 -->
+                        <div class="md:w-1/3 space-y-4">
+                            <div class="bg-slate-50 p-4 rounded-lg border-l-4 border-slate-800">
+                                <h3 class="font-bold text-slate-900 mb-2">监管三大通牒</h3>
+                                <ul class="space-y-2 text-sm text-slate-600">
+                                    <li class="flex gap-2">
+                                        <i data-lucide="check-circle-2" size="16" class="text-slate-400 flex-shrink-0"></i>
+                                        <span><strong>长期制度：</strong>不要幻想明年会放松"报行合一"。</span>
+                                    </li>
+                                    <li class="flex gap-2">
+                                        <i data-lucide="check-circle-2" size="16" class="text-slate-400 flex-shrink-0"></i>
+                                        <span><strong>严打作假：</strong>严查藏费用、虚假挂靠、中介套费。</span>
+                                    </li>
+                                    <li class="flex gap-2">
+                                        <i data-lucide="check-circle-2" size="16" class="text-slate-400 flex-shrink-0"></i>
+                                        <span><strong>惩戒提速：</strong>回溯不达标直接采取监管措施（不再仅是协会警示）。</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- 时间轴 -->
+                        <div class="md:w-2/3 relative pt-2">
+                            <div class="absolute top-4 left-0 w-full h-0.5 bg-slate-100 hidden md:block"></div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                
+                                <div class="relative z-10">
+                                    <div class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold mb-3 shadow-lg ring-4 ring-white">1月</div>
+                                    <h4 class="font-bold text-slate-800 text-sm">2025年车险回溯</h4>
+                                    <p class="text-xs text-slate-500 mt-1">监管将对2025年全年的车险业务进行合规回溯。</p>
+                                </div>
+
+                                <div class="relative z-10">
+                                    <div class="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-bold mb-3 shadow-lg ring-4 ring-white">2月</div>
+                                    <h4 class="font-bold text-slate-800 text-sm">2/24 数据监测启动</h4>
+                                    <p class="text-xs text-slate-500 mt-1">春节后首日。中小公司增速考核的关键节点。</p>
+                                </div>
+
+                                <div class="relative z-10">
+                                    <div class="w-8 h-8 rounded-full bg-rose-600 text-white flex items-center justify-center text-xs font-bold mb-3 shadow-lg ring-4 ring-white">3月</div>
+                                    <h4 class="font-bold text-slate-800 text-sm">综合费用率回溯</h4>
+                                    <p class="text-xs text-slate-500 mt-1">重点检查"费用真实性"，打击费用腾挪。</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 第四部分：竞对情报局 -->
+            <section>
+                <div class="flex items-center gap-3 mb-5 mt-8 border-b border-slate-200 pb-3">
+                    <div class="p-2 bg-slate-900 rounded-lg shadow-sm">
+                        <i data-lucide="users" size="20" class="text-white"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-900 leading-tight">同业核心打法拆解</h2>
+                        <p class="text-xs text-slate-500 mt-0.5">他山之石：头部做减量，特色化做细分</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    
+                    <!-- 人保 -->
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden p-5 hover:shadow-md transition-shadow">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="font-bold text-slate-900">人保财险</div>
+                            <span class="inline-flex items-center rounded-full font-medium border bg-blue-50 text-blue-700 border-blue-200 px-2.5 py-1 text-xs">头部</span>
+                        </div>
+                        <div class="space-y-3">
+                            <div>
+                                <div class="text-xs text-slate-500">新能源份额</div>
+                                <div class="text-lg font-bold text-slate-800">39.4% <span class="text-xs font-normal text-emerald-600">(+3.5pt vs市场)</span></div>
+                            </div>
+                            <div>
+                               <div class="text-xs text-slate-500">策略关键词</div>
+                               <div class="flex flex-wrap gap-1 mt-1">
+                                 <span class="inline-flex items-center rounded-full font-medium border bg-slate-100 text-slate-600 border-slate-200 px-1.5 py-0.5 text-[10px]">常态化回溯</span>
+                                 <span class="inline-flex items-center rounded-full font-medium border bg-slate-100 text-slate-600 border-slate-200 px-1.5 py-0.5 text-[10px]">保营运车</span>
+                                 <span class="inline-flex items-center rounded-full font-medium border bg-slate-100 text-slate-600 border-slate-200 px-1.5 py-0.5 text-[10px]">统一伤残标准</span>
+                               </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 平安 -->
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden p-5 hover:shadow-md transition-shadow">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="font-bold text-slate-900">平安财险</div>
+                            <span class="inline-flex items-center rounded-full font-medium border bg-blue-50 text-blue-700 border-blue-200 px-2.5 py-1 text-xs">头部</span>
+                        </div>
+                        <div class="space-y-3">
+                            <div>
+                                <div class="text-xs text-slate-500">风险减量成效</div>
+                                <div class="text-lg font-bold text-slate-800">赔付率 -23pt <span class="text-xs font-normal text-slate-400">(4000余台货车项目)</span></div>
+                            </div>
+                            <div>
+                               <div class="text-xs text-slate-500">策略关键词</div>
+                               <div class="flex flex-wrap gap-1 mt-1">
+                                 <span class="inline-flex items-center rounded-full font-medium border bg-slate-100 text-slate-600 border-slate-200 px-1.5 py-0.5 text-[10px]">自动化核保87%</span>
+                                 <span class="inline-flex items-center rounded-full font-medium border bg-slate-100 text-slate-600 border-slate-200 px-1.5 py-0.5 text-[10px]">红绿灯项目</span>
+                                 <span class="inline-flex items-center rounded-full font-medium border bg-slate-100 text-slate-600 border-slate-200 px-1.5 py-0.5 text-[10px]">AI识别假资料</span>
+                               </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 现代 -->
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden p-5 hover:shadow-md transition-shadow">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="font-bold text-slate-900">现代财险</div>
+                            <span class="inline-flex items-center rounded-full font-medium border bg-violet-50 text-violet-700 border-violet-200 px-2.5 py-1 text-xs">特色化</span>
+                        </div>
+                        <div class="space-y-3">
+                            <div>
+                                <div class="text-xs text-slate-500">网约车业务</div>
+                                <div class="text-lg font-bold text-slate-800">&gt;50% <span class="text-xs font-normal text-slate-400">占比</span></div>
+                            </div>
+                             <div>
+                               <div class="text-xs text-slate-500">策略关键词</div>
+                               <div class="flex flex-wrap gap-1 mt-1">
+                                 <span class="inline-flex items-center rounded-full font-medium border bg-slate-100 text-slate-600 border-slate-200 px-1.5 py-0.5 text-[10px]">放弃全渠道</span>
+                                 <span class="inline-flex items-center rounded-full font-medium border bg-slate-100 text-slate-600 border-slate-200 px-1.5 py-0.5 text-[10px]">动静态定价</span>
+                                 <span class="inline-flex items-center rounded-full font-medium border bg-slate-100 text-slate-600 border-slate-200 px-1.5 py-0.5 text-[10px]">配件集采</span>
+                               </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- 全量纪要内容 -->
+        <div id="full-record-content" class="bg-white p-8 rounded-xl shadow-sm border border-slate-200 hidden">
+            <div class="prose prose-slate max-w-none prose-headings:font-bold prose-headings:text-slate-900 prose-p:text-slate-600">
+                <div class="flex items-center gap-2 text-slate-400 text-sm mb-6 border-b pb-4">
+                    <i data-lucide="file-text" size="16"></i>
+                    <span>原始纪要归档 | 2024.12.26 成都 | 主持人：周虎</span>
+                </div>
+                
+                <h3>一、行业主体交流发言</h3>
+                <h4>1. 人保财险</h4>
+                <ul>
+                    <li><strong>合规经营：</strong>建立常态化回溯指标监控体系，对商业险自主系数、手续费率实施动态预警。</li>
+                    <li><strong>服务战略：</strong>重点保障新能源及营运车辆，全辖开放。新能源份额39.4%，投诉降24%。</li>
+                    <li><strong>理赔服务：</strong>推动人伤鉴定标准统一，理赔投诉降32%。</li>
+                </ul>
+
+                <h4>2. 平安财险</h4>
+                <ul>
+                    <li><strong>风险减量：</strong>人（好车主APP评分）、车（4000余台货车反光贴/语音提示器，赔付率降23pt）、路（红绿灯项目，投入123万治理92个路口）。</li>
+                    <li><strong>AI风控：</strong>自动化核保率87.2%，AI审核占比74%。识别虚假证件与异地挂牌。</li>
+                </ul>
+
+                <h4>3. 安诚财险 (中小公司)</h4>
+                <ul>
+                    <li><strong>困境：</strong>份额仅0.35%，被迫承保高风险（营运货客车占四成），综合费用率101%。</li>
+                    <li><strong>诉求：</strong>建议放宽中小公司费用回溯标准，避免恶性竞争退出市场。</li>
+                </ul>
+
+                <h4>4. 太平财险</h4>
+                <ul>
+                    <li><strong>创新服务：</strong>推出"一键理赔"、"无人机查勘"，理赔时效缩短60%。</li>
+                    <li><strong>渠道优化：</strong>深化与4S店合作，新能源业务增长45%。</li>
+                </ul>
+
+                <h3>二、监管政策通报</h3>
+                <h4>1. 2025年监管重点</h4>
+                <ul>
+                    <li><strong>费用真实性：</strong>严禁"账外账"，3月启动综合费用率专项回溯。</li>
+                    <li><strong>数据质量：</strong>强化承保理赔数据治理，建立"红黄蓝"预警机制。</li>
+                    <li><strong>服务规范：</strong>统一服务标准，建立行业黑名单制度。</li>
+                </ul>
+
+                <h4>2. 自律公约执行</h4>
+                <ul>
+                    <li><strong>手续费上限：</strong>商业车险手续费不得超过15%。</li>
+                    <li><strong>增值服务：</strong>规范道路救援等增值服务，禁止变相返还保费。</li>
+                    <li><strong>信息透明：</strong>保费构成明示，保障消费者知情权。</li>
+                </ul>
+
+                <h3>三、技术创新与应用</h3>
+                <h4>1. 数字化转型</h4>
+                <ul>
+                    <li><strong>核保自动化：</strong>头部公司核保自动化率超80%，中小公司普遍低于50%。</li>
+                    <li><strong>智能理赔：</strong>AI定损、区块链存证等技术应用率提升35%。</li>
+                    <li><strong>精准营销：</strong>大数据客户画像，营销转化率提升28%。</li>
+                </ul>
+
+                <h4>2. 新能源车险</h4>
+                <ul>
+                    <li><strong>专属产品：</strong>推出电池险、充电桩险等专属保障。</li>
+                    <li><strong>定价优化：</strong>基于驾驶行为、充电习惯的UBI定价模式。</li>
+                    <li><strong>服务升级：</strong>提供充电优惠、道路救援等增值服务。</li>
+                </ul>
+
+                <h3>四、市场趋势展望</h3>
+                <h4>1. 市场规模</h4>
+                <ul>
+                    <li><strong>整体增长：</strong>预计2025年车险保费增长3-5%，新能源车险增速超20%。</li>
+                    <li><strong>结构变化：</strong>营运车辆占比提升，私家车业务竞争加剧。</li>
+                </ul>
+
+                <h4>2. 竞争格局</h4>
+                <ul>
+                    <li><strong>集中度：</strong>CR3（人保、平安、太保）市场份额或进一步提升至65%。</li>
+                    <li><strong>差异化：</strong>中小公司向专业化、特色化方向发展。</li>
+                </ul>
+
+                <h3>五、风险挑战</h3>
+                <h4>1. 合规风险</h4>
+                <ul>
+                    <li><strong>监管趋严：</strong>处罚力度加大，违规成本显著上升。</li>
+                    <li><strong>数据安全：</strong>个人信息保护法实施，数据合规要求提高。</li>
+                </ul>
+
+                <h4>2. 经营风险</h4>
+                <ul>
+                    <li><strong>赔付上升：</strong>新能源车赔付率高于传统车型20-30%。</li>
+                    <li><strong>费用压力：</strong>获客成本持续攀升，盈利空间收窄。</li>
+                </ul>
+
+                <h3>六、建议措施</h3>
+                <h4>1. 监管建议</h4>
+                <ul>
+                    <li><strong>分类监管：</strong>建立差异化监管标准，支持中小公司发展。</li>
+                    <li><strong>创新试点：</strong>在自贸区开展车险产品创新试点。</li>
+                </ul>
+
+                <h4>2. 行业建议</h4>
+                <ul>
+                    <li><strong>协同创新：</strong>加强行业技术共享，降低创新成本。</li>
+                    <li><strong>人才培养：</strong>建立复合型人才培训体系。</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // 初始化 Lucide 图标
+        lucide.createIcons();
+        
+        // 标签切换功能
+        function switchTab(tab) {
+            const strategyContent = document.getElementById('strategy-content');
+            const fullRecordContent = document.getElementById('full-record-content');
+            const strategyTab = document.getElementById('strategy-tab');
+            const fullRecordTab = document.getElementById('full-record-tab');
+            
+            if (tab === 'strategy') {
+                // 显示核心看板
+                strategyContent.classList.remove('hidden');
+                fullRecordContent.classList.add('hidden');
+                
+                // 更新标签样式
+                strategyTab.classList.add('bg-white', 'text-slate-900', 'shadow-sm');
+                strategyTab.classList.remove('text-slate-500', 'hover:text-slate-700');
+                
+                fullRecordTab.classList.remove('bg-white', 'text-slate-900', 'shadow-sm');
+                fullRecordTab.classList.add('text-slate-500', 'hover:text-slate-700');
+            } else {
+                // 显示全量纪要
+                strategyContent.classList.add('hidden');
+                fullRecordContent.classList.remove('hidden');
+                
+                // 更新标签样式
+                fullRecordTab.classList.add('bg-white', 'text-slate-900', 'shadow-sm');
+                fullRecordTab.classList.remove('text-slate-500', 'hover:text-slate-700');
+                
+                strategyTab.classList.remove('bg-white', 'text-slate-900', 'shadow-sm');
+                strategyTab.classList.add('text-slate-500', 'hover:text-slate-700');
+            }
+            
+            // 重新初始化图标（确保切换后的图标正确显示）
+            setTimeout(() => {
+                lucide.createIcons();
+            }, 100);
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 确保所有图标都正确渲染
+            lucide.createIcons();
+        });
+    </script>
+</body>
+</html>

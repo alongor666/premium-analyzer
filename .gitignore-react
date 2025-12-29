@@ -9,7 +9,6 @@ lerna-debug.log*
 
 node_modules
 dist
-dist-react
 dist-ssr
 *.local
 
@@ -23,8 +22,3 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-
-# Vanilla JS version (kept for reference)
-js/
-index.html
-css/

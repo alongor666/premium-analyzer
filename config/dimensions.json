@@ -22,7 +22,7 @@
     {
       "key": "customer_category",
       "label": "客户类别",
-      "csvFields": ["客户类别", "车辆类型", "客户分类", "业务类型"],
+      "csvFields": ["客户类别", "车辆类型", "客户分类"],
       "color": "#ff0000",
       "group": 3,
       "searchable": true,
@@ -65,6 +65,15 @@
       "searchable": false
     },
     {
+      "key": "business_type",
+      "label": "业务类型",
+      "csvFields": ["业务类型", "业务", "business_type"],
+      "color": "#a9d18e",
+      "group": 3,
+      "sortable": true,
+      "searchable": true
+    },
+    {
       "key": "insurance_type",
       "label": "险种",
       "csvFields": ["险种", "保险险种", "险种类型", "insurance"],
@@ -92,9 +101,9 @@
     "aggregation": "sum"
   },
   "metadata": {
-    "version": "2.0.0",
+    "version": "2.1.0",
     "created": "2025-12-26",
-    "updated": "2025-12-26",
-    "description": "完整版配置：9个维度（三级机构、起保月、客户类别、能源类型、险别组合、是否过户车、续保状态、险种、终端来源）"
+    "updated": "2025-12-29",
+    "description": "完整版配置：10个维度（三级机构、起保月、客户类别、能源类型、险别组合、是否过户车、续保状态、业务类型、险种、终端来源）"
   }
 }
