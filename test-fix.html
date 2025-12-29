@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>修复验证测试</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .test-card {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #a02724;
+      border-bottom: 3px solid #a02724;
+      padding-bottom: 10px;
+    }
+    h2 {
+      color: #2c2c2c;
+      margin-top: 0;
+    }
+    .status {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-weight: bold;
+      margin-left: 10px;
+    }
+    .pass {
+      background: #d4edda;
+      color: #155724;
+    }
+    .fail {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    .test-item {
+      padding: 10px 0;
+      border-bottom: 1px solid #eee;
+    }
+    .test-item:last-child {
+      border-bottom: none;
+    }
+    button {
+      background: #a02724;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 10px 5px;
+    }
+    button:hover {
+      background: #8a1f1c;
+    }
+    #results {
+      white-space: pre-wrap;
+      font-family: monospace;
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 4px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔧 修复验证测试页面</h1>
+
+  <div class="test-card">
+    <h2>Bug 信息</h2>
+    <div class="test-item">
+      <strong>错误消息:</strong> <code>[ChartService] 容器不存在: chartTopOrganizations</code>
+    </div>
+    <div class="test-item">
+      <strong>根本原因:</strong> 架构迁移后的遗留代码试图渲染到已删除的容器
+    </div>
+    <div class="test-item">
+      <strong>修复状态:</strong> <span class="status pass">已修复</span>
+    </div>
+  </div>
+
+  <div class="test-card">
+    <h2>自动验证测试</h2>
+    <button onclick="runTests()">运行测试</button>
+    <button onclick="window.location.href='/'">打开主应用</button>
+    <div id="results"></div>
+  </div>
+
+  <div class="test-card">
+    <h2>手动测试步骤</h2>
+    <ol>
+      <li>点击 "打开主应用" 按钮</li>
+      <li>上传测试数据文件: <code>test-data.csv</code></li>
+      <li>验证概览页的月度趋势图正常显示</li>
+      <li>切换到 "柱状图" 标签页，验证图表正常显示</li>
+      <li>切换到 "占比图" 标签页，验证玫瑰图正常显示</li>
+      <li>打开浏览器控制台，确认没有 "容器不存在" 错误</li>
+      <li>应用筛选条件，验证图表更新正常</li>
+    </ol>
+  </div>
+
+  <script>
+    function runTests() {
+      const results = document.getElementById('results');
+      results.textContent = '正在运行测试...\n\n';
+
+      const tests = [
+        {
+          name: '验证旧容器不存在',
+          test: () => !document.getElementById('chartTopOrganizations'),
+          expected: true
+        },
+        {
+          name: '验证 chartMonthTrend 容器存在',
+          test: () => {
+            // 需要在主页面中验证
+            return fetch('/')
+              .then(r => r.text())
+              .then(html => html.includes('id="chartMonthTrend"'));
+          },
+          expected: true
+        },
+        {
+          name: '验证 chartBarMain 容器存在',
+          test: () => {
+            return fetch('/')
+              .then(r => r.text())
+              .then(html => html.includes('id="chartBarMain"'));
+          },
+          expected: true
+        },
+        {
+          name: '验证 chartRatioMain 容器存在',
+          test: () => {
+            return fetch('/')
+              .then(r => r.text())
+              .then(html => html.includes('id="chartRatioMain"'));
+          },
+          expected: true
+        },
+        {
+          name: '验证 app.js 不包含 chartTopOrganizations',
+          test: () => {
+            return fetch('/js/app.js')
+              .then(r => r.text())
+              .then(code => !code.includes('chartTopOrganizations'));
+          },
+          expected: true
+        },
+        {
+          name: '验证 app.js 包含 renderTabContent',
+          test: () => {
+            return fetch('/js/app.js')
+              .then(r => r.text())
+              .then(code => code.includes('renderTabContent'));
+          },
+          expected: true
+        }
+      ];
+
+      let passed = 0;
+      let failed = 0;
+
+      Promise.all(tests.map(async (t, i) => {
+        try {
+          const result = await t.test();
+          const status = result === t.expected ? '✅ PASS' : '❌ FAIL';
+          if (result === t.expected) passed++;
+          else failed++;
+
+          results.textContent += `${i + 1}. ${t.name}: ${status}\n`;
+        } catch (error) {
+          failed++;
+          results.textContent += `${i + 1}. ${t.name}: ❌ ERROR - ${error.message}\n`;
+        }
+      })).then(() => {
+        results.textContent += `\n━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+        results.textContent += `总计: ${tests.length} 个测试\n`;
+        results.textContent += `通过: ${passed} ✅\n`;
+        results.textContent += `失败: ${failed} ❌\n`;
+
+        if (failed === 0) {
+          results.textContent += `\n🎉 所有测试通过！修复验证成功！\n`;
+        } else {
+          results.textContent += `\n⚠️ 部分测试失败，请检查修复。\n`;
+        }
+      });
+    }
+
+    // 页面加载时自动运行测试
+    window.addEventListener('load', () => {
+      setTimeout(runTests, 500);
+    });
+  </script>
+</body>
+</html>

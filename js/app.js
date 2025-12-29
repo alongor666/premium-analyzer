@@ -235,7 +235,7 @@ class PremiumAnalyzer {
   /**
    * 切换标签页
    */
-  switchTab(tabName) {
+  async switchTab(tabName) {
     // 更新导航按钮状态
     document.querySelectorAll('.tab-item').forEach(item => {
       item.classList.remove('active');
@@ -255,13 +255,13 @@ class PremiumAnalyzer {
     }
 
     // 根据标签页渲染对应内容
-    this.renderTabContent(tabName);
+    await this.renderTabContent(tabName);
   }
 
   /**
    * 渲染标签页内容
    */
-  renderTabContent(tabName) {
+  async renderTabContent(tabName) {
     const aggregatedData = window.StateManager.getState('aggregatedData');
     const currentGroupBy = window.StateManager.getState('currentGroupBy');
 
@@ -275,7 +275,7 @@ class PremiumAnalyzer {
     switch(tabName) {
       case 'overview':
         // 概览页：只渲染趋势图（固定为起保月）
-        this.renderMonthTrendChart(aggregatedData);
+        await this.renderMonthTrendChart();
         break;
 
       case 'barChart':
@@ -440,23 +440,50 @@ class PremiumAnalyzer {
 
   /**
    * 渲染月度趋势图（概览页专用）
+   * 概览页固定使用起保月聚合，不受当前维度影响
    */
-  renderMonthTrendChart(data) {
-    // 概览页的趋势图应该固定使用起保月聚合
-    // 如果当前数据不是按起保月聚合的，需要重新聚合
+  async renderMonthTrendChart() {
     const currentGroupBy = window.StateManager.getState('currentGroupBy');
 
+    // 如果当前不是按起保月聚合，需要重新聚合
     if (currentGroupBy !== 'start_month') {
       console.log('[App] 概览页需要按起保月聚合，重新查询...');
-      // 注意：这里需要异步处理，简化起见暂时使用当前数据
-      // 实际生产中应该重新调用 Worker 进行聚合
-    }
 
-    this.components.chartService.renderChart(
-      'chartMonthTrend',
-      'line',
-      data
-    );
+      try {
+        // 显示加载状态
+        this.showLoading('正在加载数据...');
+
+        // 获取当前筛选条件
+        const filters = window.StateManager.getState('filters.applied');
+
+        // 按起保月重新聚合
+        const result = await window.WorkerBridge.applyFilter(filters, 'start_month');
+
+        // 隐藏加载状态
+        this.hideLoading();
+
+        // 渲染图表
+        this.components.chartService.renderChart(
+          'chartMonthTrend',
+          'line',
+          result.aggregated
+        );
+
+      } catch (error) {
+        console.error('[App] 加载起保月数据失败:', error);
+        this.hideLoading();
+        this.showError('加载失败', error.message);
+      }
+
+    } else {
+      // 当前已是按起保月聚合，直接使用现有数据
+      const aggregatedData = window.StateManager.getState('aggregatedData');
+      this.components.chartService.renderChart(
+        'chartMonthTrend',
+        'line',
+        aggregatedData
+      );
+    }
   }
 
   /**
@@ -528,8 +555,12 @@ class PremiumAnalyzer {
       });
       this.components.metricCard.render(metrics);
 
-      // 渲染图表
-      this.renderCharts(result.aggregated, globalStats.monthRange);
+      // 渲染当前活动的标签页（默认为概览页）
+      const activeTab = document.querySelector('.tab-item.active');
+      if (activeTab) {
+        const tabName = activeTab.dataset.tab;
+        await this.renderTabContent(tabName);
+      }
 
     } catch (error) {
       console.error('[App] 仪表盘渲染失败:', error);
@@ -540,7 +571,7 @@ class PremiumAnalyzer {
   /**
    * 更新仪表盘（筛选后）
    */
-  updateDashboard(result) {
+  async updateDashboard(result) {
     const globalStats = window.StateManager.getState('globalStats');
 
     // 更新指标卡片
@@ -551,43 +582,14 @@ class PremiumAnalyzer {
     });
     this.components.metricCard.render(metrics);
 
-    // 更新图表
-    this.renderCharts(result.aggregated, globalStats.monthRange);
+    // 重新渲染当前活动的标签页
+    const activeTab = document.querySelector('.tab-item.active');
+    if (activeTab) {
+      const tabName = activeTab.dataset.tab;
+      await this.renderTabContent(tabName);
+    }
   }
 
-  /**
-   * 渲染图表
-   */
-  renderCharts(aggregatedData, monthRange) {
-    console.log('[App] renderCharts 调用:', {
-      aggregatedDataLength: aggregatedData?.length,
-      aggregatedDataSample: aggregatedData?.slice(0, 2),
-      monthRange
-    });
-
-    if (!aggregatedData || aggregatedData.length === 0) {
-      console.warn('[App] 聚合数据为空，无法渲染图表');
-      return;
-    }
-
-    const groupBy = window.StateManager.getState('currentGroupBy');
-
-    // 月度趋势图（如果按月份聚合）
-    if (groupBy === 'start_month' && monthRange && monthRange.length > 0) {
-      console.log('[App] 渲染月度趋势图（按月份）');
-      this.components.chartService.renderChart('chartMonthTrend', 'line', aggregatedData);
-    } else {
-      // 否则显示TOP5
-      const top5 = aggregatedData.slice(0, 5);
-      console.log('[App] 渲染月度趋势图（TOP5）:', top5);
-      this.components.chartService.renderChart('chartMonthTrend', 'line', top5);
-    }
-
-    // TOP5机构柱状图
-    const top5Orgs = aggregatedData.slice(0, 5);
-    console.log('[App] 渲染TOP5机构图:', top5Orgs);
-    this.components.chartService.renderChart('chartTopOrganizations', 'bar', top5Orgs);
-  }
 
   /**
    * 显示加载状态
