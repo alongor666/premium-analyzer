@@ -222,6 +222,14 @@ class PremiumAnalyzer {
       });
     }
 
+    // 重新导入数据按钮
+    const reloadDataBtn = document.getElementById('reloadDataBtn');
+    if (reloadDataBtn) {
+      reloadDataBtn.addEventListener('click', () => {
+        this.reloadData();
+      });
+    }
+
     // 错误模态框关闭
     document.getElementById('modalCloseBtn').addEventListener('click', () => {
       document.getElementById('errorModal').style.display = 'none';
@@ -634,6 +642,48 @@ class PremiumAnalyzer {
     document.getElementById('errorTitle').textContent = title;
     document.getElementById('errorMessage').textContent = message;
     modal.style.display = 'flex';
+  }
+
+  /**
+   * 重新导入数据
+   */
+  reloadData() {
+    // 确认操作
+    const confirmed = confirm('确定要重新导入数据吗？\n\n当前的筛选和分析结果将会丢失。');
+    if (!confirmed) {
+      return;
+    }
+
+    console.log('[App] 重新导入数据');
+
+    // 清空状态
+    window.StateManager.setState({
+      rawData: null,
+      globalStats: null,
+      aggregatedData: null,
+      dimensions: null,
+      filters: {
+        draft: {},
+        applied: {}
+      }
+    });
+
+    // 隐藏仪表盘区域
+    document.getElementById('dashboardSection').style.display = 'none';
+
+    // 显示上传区域
+    document.getElementById('uploadSection').style.display = 'flex';
+
+    // 隐藏数据信息
+    document.getElementById('dataInfo').style.display = 'none';
+
+    // 隐藏重新导入按钮
+    document.getElementById('reloadDataBtn').style.display = 'none';
+
+    // 重置文件输入
+    document.getElementById('fileInput').value = '';
+
+    console.log('[App] 已重置为初始状态，可以重新上传文件');
   }
 
   /**

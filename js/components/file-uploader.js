@@ -139,6 +139,9 @@ class FileUploader {
     // 更新数据信息
     document.getElementById('dataCount').textContent = result.total;
     document.getElementById('dataInfo').style.display = 'inline';
+
+    // 显示重新导入数据按钮
+    document.getElementById('reloadDataBtn').style.display = 'inline-block';
   }
 
   showError(title, message) {
