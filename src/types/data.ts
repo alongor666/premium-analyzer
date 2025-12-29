@@ -32,6 +32,7 @@ export interface AggregatedData {
 export interface GlobalStats {
   totalPremium: number;
   totalCount: number;
+  totalRows: number;
   monthRange: string[];
 }
 
@@ -44,6 +45,8 @@ export interface ParseResult {
   dimensions: Record<string, string[]>;
   monthRange: string[];
   fields: string[];
+  rows: DataRow[];
+  globalStats: GlobalStats;
 }
 
 /**
