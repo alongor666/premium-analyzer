@@ -455,3 +455,56 @@
 .sync-toggle:hover {
   color: var(--text-primary);
 }
+
+/* 占比视图切换组件（可复用） */
+.ratio-view-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.ratio-view-toggle .toggle-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* 按钮组（可复用） */
+.btn-group {
+  display: inline-flex;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.btn-toggle {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-light);
+  color: var(--text-secondary);
+  padding: 6px 14px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  border-radius: 0;
+  margin: 0;
+}
+
+.btn-toggle:not(:last-child) {
+  border-right: none;
+}
+
+.btn-toggle:hover {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.btn-toggle.active {
+  background: var(--primary-red);
+  color: white;
+  font-weight: 500;
+  border-color: var(--primary-red);
+}
+
+.btn-toggle.active:hover {
+  background: #8a1f1c;
+}

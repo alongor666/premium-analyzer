@@ -293,6 +293,275 @@ EventBus.on('data-loaded', (data) => {
 
 ---
 
+## 📦 可复用组件库（Reusable Components Library）
+
+**重要性**：本项目强调组件可复用性，所有新功能应优先使用已有组件，确保代码一致性和可维护性。
+
+### 组件复用原则
+
+1. **优先复用**：开发新功能前，先查阅本章节，优先使用已有组件
+2. **创建新组件**：无合适组件时，创建可复用的通用组件（而非专用实现）
+3. **文档更新**：新增组件后，**必须**在此章节添加文档
+4. **团队协作**：清晰的组件文档是团队协作的基础
+
+---
+
+### 1. 数据处理组件 (DataProcessor)
+
+**文件位置**: `js/utils/data-processor.js`
+
+**用途**: 数据聚合、占比计算、增长率计算等数据处理功能
+
+#### 1.1 占比计算
+
+```javascript
+// 基础贡献度计算（全局）
+const data = [
+  { dimension: '1月', premium: 100 },
+  { dimension: '2月', premium: 200 }
+];
+const result = DataProcessor.calculateContribution(data);
+// => [
+//   { dimension: '1月', premium: 100, contribution: 33.33 },
+//   { dimension: '2月', premium: 200, contribution: 66.67 }
+// ]
+
+// 时间序列贡献度
+const result = DataProcessor.calculateTimeSeriesContribution(monthlyData);
+
+// 占年度保费比（年度累计占比）
+const result = DataProcessor.calculateAnnualRatio(monthlyData);
+// => 每月保费占全年保费的百分比
+
+// 占当月车险比（横向对比）
+const filteredData = [...]; // 筛选后的月度数据（如：摩托车）
+const totalData = [...];    // 全量月度数据（所有类别）
+const result = DataProcessor.calculateMonthlyRatio(filteredData, totalData);
+// => 每月摩托车保费占当月总保费的百分比
+```
+
+**应用场景**:
+- 月度保费趋势图的占比视图
+- 任何需要计算百分比/贡献度的场景
+- 同环比分析
+
+---
+
+### 2. 时间排序组件 (DateSorter)
+
+**文件位置**: `js/utils/date-sorter.js`
+
+**用途**: 月份、季度、年份的自然排序
+
+#### 2.1 月份排序
+
+```javascript
+const data = [
+  { dimension: '11月', premium: 100 },
+  { dimension: '2月', premium: 200 },
+  { dimension: '1月', premium: 150 }
+];
+
+// 自动按1-12月排序
+const sorted = DateSorter.sortByMonth(data);
+// => [1月, 2月, 11月]
+```
+
+**支持格式**:
+- `'2025-01'`, `'2025-1'` (ISO格式)
+- `'1月'`, `'11月'` (中文)
+- `'Jan'`, `'Feb'` (英文缩写)
+- `'一月'`, `'十一月'` (中文全称)
+- `'01'`, `'1'` (纯数字)
+
+#### 2.2 季度/年份排序
+
+```javascript
+// 季度排序
+DateSorter.sortByQuarter(data);  // Q1, Q2, Q3, Q4
+
+// 年份排序
+DateSorter.sortByYear(data);     // 2023, 2024, 2025
+
+// 自动识别
+DateSorter.sortByTime(data, 'auto');
+```
+
+**应用场景**:
+- 所有时间序列图表的数据预处理
+- 确保X轴按自然时间顺序显示
+
+---
+
+### 3. 双Y轴图表组件 (ChartService.buildDualAxisLineChart)
+
+**文件位置**: `js/services/chart-service.js`
+
+**用途**: 展示两个不同量纲指标的趋势对比（如：保费 + 占比）
+
+#### 3.1 基础用法
+
+```javascript
+// 月度保费 + 占年度保费比
+chartService.renderChart('chartId', 'dualAxisLine', data, {
+  leftAxisName: '保费收入(万元)',
+  rightAxisName: '占年度保费比(%)',
+  rightAxisField: 'annualRatio',
+  rightAxisMax: 20,           // 右Y轴最大值20%
+  sortByTime: true,           // 自动月份排序
+  showArea: true,             // 显示面积图
+  rotateXLabel: false         // X轴标签不倾斜
+});
+```
+
+#### 3.2 参数说明
+
+| 参数 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `leftAxisName` | string | '保费收入(万元)' | 左Y轴名称 |
+| `rightAxisName` | string | '贡献度(%)' | 右Y轴名称 |
+| `rightAxisField` | string | 'contribution' | 右Y轴数据字段名 |
+| `rightAxisMax` | number | null | 右Y轴最大值（null=自动） |
+| `sortByTime` | boolean | true | 是否自动时间排序 |
+| `showArea` | boolean | true | 是否显示面积图 |
+| `rotateXLabel` | boolean | false | 是否旋转X轴标签 |
+
+#### 3.3 应用场景
+
+```javascript
+// 场景1: 保费 + 环比增长率
+chartService.renderChart('chartGrowth', 'dualAxisLine', data, {
+  leftAxisName: '保费收入(万元)',
+  rightAxisName: '环比增长率(%)',
+  rightAxisField: 'growth',
+  rightAxisMax: null  // 自动范围
+});
+
+// 场景2: 业务量 + 转化率
+chartService.renderChart('chartConversion', 'dualAxisLine', data, {
+  leftAxisName: '业务量(单)',
+  rightAxisName: '转化率(%)',
+  rightAxisField: 'conversionRate',
+  rightAxisMax: 100
+});
+
+// 场景3: 收入 + 利润率
+chartService.renderChart('chartProfit', 'dualAxisLine', data, {
+  leftAxisName: '营业收入(万元)',
+  rightAxisName: '利润率(%)',
+  rightAxisField: 'profitMargin',
+  rightAxisMax: 50
+});
+```
+
+---
+
+### 4. UI切换组件 (btn-group + ratio-view-toggle)
+
+**文件位置**: `css/components.css` (459-510行)
+
+**用途**: 单选按钮组，用于视图/模式切换
+
+#### 4.1 HTML结构
+
+```html
+<div class="ratio-view-toggle">
+  <label class="toggle-label">占比视图：</label>
+  <div class="btn-group">
+    <button class="btn btn-xs btn-toggle active" data-ratio-view="annual">
+      占年度保费比
+    </button>
+    <button class="btn btn-xs btn-toggle" data-ratio-view="monthly">
+      占当月车险比
+    </button>
+  </div>
+</div>
+```
+
+#### 4.2 JavaScript绑定
+
+```javascript
+// 绑定切换事件
+document.querySelectorAll('[data-ratio-view]').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    const view = e.target.dataset.ratioView;
+    switchView(view);  // 自定义切换逻辑
+  });
+});
+
+// 更新按钮状态
+function switchView(view) {
+  document.querySelectorAll('[data-ratio-view]').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.ratioView === view);
+  });
+  // ... 执行切换逻辑
+}
+```
+
+#### 4.3 应用场景
+
+- 图表类型切换（柱状图/折线图/饼图）
+- 时间粒度切换（日/周/月/年）
+- 数据视图切换（绝对值/百分比）
+- 排序方式切换（按金额/按数量）
+
+---
+
+### 5. 数值格式化工具 (Formatters)
+
+**文件位置**: `js/utils/formatters.js`
+
+**用途**: 统一的数值、日期、货币格式化
+
+#### 5.1 核心方法
+
+```javascript
+// 保费格式化（取整）
+formatPremium(12345.67);  // => "12,346 万元"
+
+// 占比格式化（1位小数）
+formatRatio(0.2567);              // => "25.7%"
+formatRatio(25.67, true);         // => "25.7%" (已是百分比)
+
+// 通用数字格式化
+formatNumber(1234.567, '0,0');     // => "1,235"
+formatNumber(1234.567, '0,0.0');   // => "1,234.6"
+formatNumber(1234.567, '0,0.00');  // => "1,234.57"
+
+// 日期格式化
+formatDate(new Date(), 'YYYY-MM-DD');  // => "2025-12-30"
+formatDate(new Date(), 'YYYY-MM');     // => "2025-12"
+```
+
+**重要约定**:
+- **保费**：取整显示（避免小数点干扰）
+- **占比**：1位小数（平衡精度与可读性）
+- **全局一致性**：所有数值显示必须使用这些方法
+
+---
+
+### 6. 组件使用检查清单
+
+**开发新功能前，请检查**:
+
+- [ ] 需要数据聚合/占比计算？→ 使用 `DataProcessor`
+- [ ] 需要时间序列排序？→ 使用 `DateSorter`
+- [ ] 需要双Y轴图表？→ 使用 `buildDualAxisLineChart`
+- [ ] 需要视图切换按钮？→ 使用 `btn-group` 组件
+- [ ] 需要格式化数值？→ 使用 `formatters` 工具
+- [ ] 需要组件通信？→ 使用 `EventBus`
+- [ ] 需要状态管理？→ 使用 `StateManager`
+
+**创建新组件时**:
+
+1. ✅ 设计为通用组件（支持参数配置）
+2. ✅ 添加完整的JSDoc注释和使用示例
+3. ✅ 在 `CLAUDE.md` 添加文档
+4. ✅ 考虑边界情况和错误处理
+5. ✅ 遵循现有命名规范
+
+---
+
 ## 🔧 Code Quality & Debugging
 
 ### Browser Console Tools

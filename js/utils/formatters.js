@@ -45,21 +45,31 @@ function formatNumber(value, format = '0,0.00') {
 }
 
 /**
- * 格式化保费（万元）
+ * 格式化保费（万元）- 取整
  * @param {number} value - 保费数值
  * @returns {string} 格式化后的字符串
  */
 function formatPremium(value) {
-  return formatNumber(value, '0,0.00') + ' 万元';
+  return formatNumber(value, '0,0') + ' 万元';
 }
 
 /**
- * 格式化占比
- * @param {number} ratio - 占比（0-1）
+ * 格式化占比 - 1位小数
+ * @param {number} ratio - 占比（0-100 或 0-1）
+ * @param {boolean} isPercentage - 是否已是百分比数值（默认false，即0-1范围）
  * @returns {string} 格式化后的字符串
  */
-function formatRatio(ratio) {
-  return formatNumber(ratio, '0.00%');
+function formatRatio(ratio, isPercentage = false) {
+  const num = parseFloat(ratio);
+  if (isNaN(num)) return '0.0%';
+
+  // 如果已经是百分比数值（0-100），直接格式化
+  if (isPercentage) {
+    return num.toFixed(1) + '%';
+  }
+
+  // 否则先乘以100
+  return (num * 100).toFixed(1) + '%';
 }
 
 /**

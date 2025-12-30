@@ -67,6 +67,8 @@ class ChartService {
     switch(chartType) {
       case 'line':
         return this.buildLineChart(data);
+      case 'dualAxisLine':
+        return this.buildDualAxisLineChart(data, options);
       case 'bar':
         return this.buildBarChart(data, options);
       case 'pie':
@@ -135,6 +137,174 @@ class ChartService {
           }
         }
       }]
+    };
+  }
+
+  /**
+   * 双Y轴折线图配置（可复用）
+   * 左Y轴：主指标（如保费收入）
+   * 右Y轴：次指标（如贡献度、增长率等）
+   *
+   * @param {Array} data - 数据数组，需包含dimension、premium、contribution等字段
+   * @param {Object} options - 配置项
+   * @param {string} options.leftAxisName - 左Y轴名称（默认：保费收入(万元)）
+   * @param {string} options.rightAxisName - 右Y轴名称（默认：贡献度(%)）
+   * @param {string} options.rightAxisField - 右Y轴数据字段（默认：contribution）
+   * @param {number} options.rightAxisMax - 右Y轴最大值（默认：根据rightAxisField自动判断）
+   * @param {boolean} options.sortByTime - 是否按时间排序（默认：true）
+   * @param {boolean} options.showArea - 是否显示面积图（默认：true）
+   * @param {boolean} options.rotateXLabel - 是否旋转X轴标签（默认：false）
+   *
+   * @example
+   * // 月度保费 + 占年度保费比（最高20%）
+   * chartService.renderChart('chartId', 'dualAxisLine', data, {
+   *   leftAxisName: '保费收入(万元)',
+   *   rightAxisName: '占年度保费比(%)',
+   *   rightAxisField: 'annualRatio',
+   *   rightAxisMax: 20,
+   *   sortByTime: true
+   * });
+   *
+   * @example
+   * // 月度保费 + 占当月车险比（最高75%）
+   * chartService.renderChart('chartId', 'dualAxisLine', data, {
+   *   leftAxisName: '保费收入(万元)',
+   *   rightAxisName: '占当月车险比(%)',
+   *   rightAxisField: 'monthlyRatio',
+   *   rightAxisMax: 75,
+   *   sortByTime: true
+   * });
+   */
+  buildDualAxisLineChart(data, options = {}) {
+    const {
+      leftAxisName = '保费收入(万元)',
+      rightAxisName = '贡献度(%)',
+      rightAxisField = 'contribution',
+      rightAxisMax = null,  // 新增：允许自定义右Y轴最大值
+      sortByTime = true,
+      showArea = true,
+      rotateXLabel = false
+    } = options;
+
+    // 按时间排序（如果启用）
+    let processedData = data;
+    if (sortByTime && window.DateSorter) {
+      processedData = window.DateSorter.sortByMonth(data);
+    }
+
+    // 计算贡献度（如果数据中没有）
+    if (rightAxisField === 'contribution' && !processedData[0]?.contribution && window.DataProcessor) {
+      processedData = window.DataProcessor.calculateTimeSeriesContribution(processedData);
+    }
+
+    return {
+      grid: {
+        left: '3%',
+        right: '8%',        // 右侧留空间给右Y轴
+        bottom: '10%',
+        top: '15%',
+        containLabel: true
+      },
+      tooltip: {
+        trigger: 'axis',
+        formatter: (params) => {
+          let result = `<strong>${params[0].axisValue}</strong><br/>`;
+          params.forEach(param => {
+            const value = param.seriesName.includes('贡献度') || param.seriesName.includes('增长')
+              ? formatRatio(param.value)
+              : formatPremium(param.value);
+            result += `${param.marker} ${param.seriesName}: ${value}<br/>`;
+          });
+          return result;
+        }
+      },
+      legend: {
+        data: [leftAxisName.replace(/\(.*\)/, ''), rightAxisName.replace(/\(.*\)/, '')],
+        top: '5%'
+      },
+      xAxis: {
+        type: 'category',
+        data: processedData.map(d => d.dimension),
+        axisLabel: {
+          rotate: rotateXLabel ? 45 : 0,
+          fontSize: 11,
+          interval: 0  // 显示所有标签
+        }
+      },
+      yAxis: [
+        // 左Y轴：保费收入
+        {
+          type: 'value',
+          name: leftAxisName,
+          position: 'left',
+          axisLabel: {
+            formatter: (value) => formatNumber(value, '0,0')
+          },
+          splitLine: {
+            lineStyle: {
+              color: '#e0e0e0'
+            }
+          }
+        },
+        // 右Y轴：贡献度/增长率
+        {
+          type: 'value',
+          name: rightAxisName,
+          position: 'right',
+          axisLabel: {
+            formatter: '{value}%'
+          },
+          splitLine: {
+            show: false  // 隐藏右Y轴网格线，避免与左Y轴冲突
+          },
+          min: 0,
+          max: rightAxisMax !== null
+            ? rightAxisMax  // 使用自定义最大值
+            : (rightAxisField === 'contribution' ? 100 : undefined)  // 默认：贡献度100%，其他自动
+        }
+      ],
+      series: [
+        // 系列1：保费收入（左Y轴）
+        {
+          name: leftAxisName.replace(/\(.*\)/, '').trim(),
+          type: 'line',
+          yAxisIndex: 0,  // 使用左Y轴
+          data: processedData.map(d => d.premium),
+          smooth: true,
+          itemStyle: {
+            color: this.colors[0]  // 蓝色
+          },
+          areaStyle: showArea ? {
+            opacity: 0.2
+          } : undefined,
+          label: {
+            show: true,
+            position: 'top',
+            formatter: (params) => formatNumber(params.value, '0,0.0'),
+            fontSize: 10
+          }
+        },
+        // 系列2：贡献度/增长率（右Y轴）
+        {
+          name: rightAxisName.replace(/\(.*\)/, '').trim(),
+          type: 'line',
+          yAxisIndex: 1,  // 使用右Y轴
+          data: processedData.map(d => d[rightAxisField] || 0),
+          smooth: true,
+          itemStyle: {
+            color: this.colors[2]  // 红色
+          },
+          lineStyle: {
+            type: 'dashed'  // 虚线区分
+          },
+          label: {
+            show: true,
+            position: 'bottom',
+            formatter: (params) => `${formatNumber(params.value, '0.0')}%`,
+            fontSize: 10
+          }
+        }
+      ]
     };
   }
 

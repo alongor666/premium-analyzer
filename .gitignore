@@ -24,7 +24,12 @@ dist-ssr
 *.sln
 *.sw?
 
+# Data files
+*.xlsx
+*.xls
+*.csv
+
 # Vanilla JS version (kept for reference)
-js/
-index.html
-css/
+# js/
+# index.html
+# css/

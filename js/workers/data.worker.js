@@ -201,13 +201,15 @@ function buildFieldMap(sampleRow) {
   const config = {
     third_level_organization: ['三级机构', '机构名称', 'organization', '三级机构名称'],
     start_month: ['起保月', '保单月份', '起保日期', 'month', 'start_month'],
-    customer_category: ['客户类别', '车辆类型', '客户分类', '业务类型'],
+    customer_category: ['客户类别', '车辆类型', '客户分类'],
 
-    // 新增：6个维度
+    // 新增：7个维度
     energy_type: ['能源类型', '是否新能源', '新能源', '能源', 'energy_type'],
     coverage_type: ['险别组合', '险别', '保险类型', 'coverage_type'],
     is_transferred_vehicle: ['是否过户车', '过户车', '是否过户', 'transfer_status'],
-    renewal_status: ['续保状态', '是否续保', '续保', 'renewal'],
+    renewal_status: ['续保状态', '是否续保', '续保', 'renewal', '转续保'],
+    business_type: ['业务类型', '业务', 'business_type'],
+    tonnage_segment: ['吨位分段', '吨位', 'tonnage', '吨位段'],
     insurance_type: ['险种', '保险险种', '险种类型', 'insurance'],
     terminal_source: ['终端来源', '渠道', '来源', 'source', 'channel'],
 

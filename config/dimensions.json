@@ -74,6 +74,15 @@
       "searchable": true
     },
     {
+      "key": "tonnage_segment",
+      "label": "吨位分段",
+      "csvFields": ["吨位分段", "吨位", "tonnage", "吨位段"],
+      "color": "#d5a6bd",
+      "group": 4,
+      "sortable": true,
+      "searchable": false
+    },
+    {
       "key": "insurance_type",
       "label": "险种",
       "csvFields": ["险种", "保险险种", "险种类型", "insurance"],
@@ -101,9 +110,9 @@
     "aggregation": "sum"
   },
   "metadata": {
-    "version": "2.1.0",
+    "version": "2.2.0",
     "created": "2025-12-26",
-    "updated": "2025-12-29",
-    "description": "完整版配置：10个维度（三级机构、起保月、客户类别、能源类型、险别组合、是否过户车、续保状态、业务类型、险种、终端来源）"
+    "updated": "2025-12-30",
+    "description": "完整版配置：11个维度（三级机构、起保月、客户类别、能源类型、险别组合、是否过户车、续保状态、业务类型、吨位分段、险种、终端来源）。注：险种和终端来源为可选维度，具体可用维度取决于数据文件。"
   }
 }

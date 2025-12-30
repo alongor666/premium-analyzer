@@ -7,6 +7,8 @@ class PremiumAnalyzer {
     this.config = null;
     this.components = {};
     this.isInitialized = false;
+    this.ratioView = 'annual';  // 占比视图：'annual' (占年度保费比) | 'monthly' (占当月车险比)
+    this.totalMonthlyData = null;  // 缓存全量月度数据（用于计算占当月车险比）
   }
 
   /**
@@ -238,6 +240,14 @@ class PremiumAnalyzer {
     document.getElementById('errorConfirmBtn').addEventListener('click', () => {
       document.getElementById('errorModal').style.display = 'none';
     });
+
+    // 占比视图切换按钮
+    document.querySelectorAll('[data-ratio-view]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const view = e.target.dataset.ratioView;
+        this.switchRatioView(view);
+      });
+    });
   }
 
   /**
@@ -447,11 +457,44 @@ class PremiumAnalyzer {
   }
 
   /**
+   * 切换占比视图
+   * @param {string} view - 'annual' (占年度保费比) | 'monthly' (占当月车险比)
+   */
+  switchRatioView(view) {
+    if (this.ratioView === view) return;  // 无变化
+
+    console.log(`[App] 切换占比视图: ${this.ratioView} -> ${view}`);
+    this.ratioView = view;
+
+    // 更新按钮状态
+    document.querySelectorAll('[data-ratio-view]').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.ratioView === view);
+    });
+
+    // 重新渲染图表
+    this.renderMonthTrendChart();
+  }
+
+  /**
    * 渲染月度趋势图（概览页专用）
    * 概览页固定使用起保月聚合，不受当前维度影响
+   * 双Y轴图表：左Y轴显示保费收入，右Y轴显示保费贡献度（支持两种占比视图）
    */
   async renderMonthTrendChart() {
     const currentGroupBy = window.StateManager.getState('currentGroupBy');
+
+    // 确定占比配置
+    const ratioConfig = this.ratioView === 'annual'
+      ? {
+          rightAxisName: '占年度保费比(%)',
+          rightAxisField: 'annualRatio',
+          rightAxisMax: 20
+        }
+      : {
+          rightAxisName: '占当月车险比(%)',
+          rightAxisField: 'monthlyRatio',
+          rightAxisMax: 75
+        };
 
     // 如果当前不是按起保月聚合，需要重新聚合
     if (currentGroupBy !== 'start_month') {
@@ -464,17 +507,40 @@ class PremiumAnalyzer {
         // 获取当前筛选条件
         const filters = window.StateManager.getState('filters.applied');
 
-        // 按起保月重新聚合
+        // 按起保月重新聚合（获取筛选后数据）
         const result = await window.WorkerBridge.applyFilter(filters, 'start_month');
 
         // 隐藏加载状态
         this.hideLoading();
 
-        // 渲染图表
+        // 处理数据并计算占比
+        let chartData = result.aggregated;
+
+        if (this.ratioView === 'annual') {
+          // 占年度保费比：当月保费 / 全年保费
+          chartData = window.DataProcessor.calculateAnnualRatio(chartData);
+        } else {
+          // 占当月车险比：需要全量月度数据作为分母
+          // 如果没有缓存全量数据，先获取
+          if (!this.totalMonthlyData) {
+            const totalResult = await window.WorkerBridge.applyFilter([], 'start_month');
+            this.totalMonthlyData = totalResult.aggregated;
+          }
+          chartData = window.DataProcessor.calculateMonthlyRatio(chartData, this.totalMonthlyData);
+        }
+
+        // 渲染双Y轴图表
         this.components.chartService.renderChart(
           'chartMonthTrend',
-          'line',
-          result.aggregated
+          'dualAxisLine',
+          chartData,
+          {
+            leftAxisName: '保费收入(万元)',
+            ...ratioConfig,
+            sortByTime: true,
+            showArea: true,
+            rotateXLabel: false
+          }
         );
 
       } catch (error) {
@@ -485,11 +551,32 @@ class PremiumAnalyzer {
 
     } else {
       // 当前已是按起保月聚合，直接使用现有数据
-      const aggregatedData = window.StateManager.getState('aggregatedData');
+      let chartData = window.StateManager.getState('aggregatedData');
+
+      // 处理数据并计算占比
+      if (this.ratioView === 'annual') {
+        // 占年度保费比
+        chartData = window.DataProcessor.calculateAnnualRatio(chartData);
+      } else {
+        // 占当月车险比：需要全量月度数据
+        if (!this.totalMonthlyData) {
+          const totalResult = await window.WorkerBridge.applyFilter([], 'start_month');
+          this.totalMonthlyData = totalResult.aggregated;
+        }
+        chartData = window.DataProcessor.calculateMonthlyRatio(chartData, this.totalMonthlyData);
+      }
+
       this.components.chartService.renderChart(
         'chartMonthTrend',
-        'line',
-        aggregatedData
+        'dualAxisLine',
+        chartData,
+        {
+          leftAxisName: '保费收入(万元)',
+          ...ratioConfig,
+          sortByTime: true,
+          showArea: true,
+          rotateXLabel: false
+        }
       );
     }
   }
