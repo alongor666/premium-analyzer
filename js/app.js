@@ -457,6 +457,31 @@ class PremiumAnalyzer {
   }
 
   /**
+   * 获取分母筛选条件（排除业务分类维度）
+   * 用于计算"占当月车险比"时，确保分子分母的筛选范围一致
+   *
+   * @param {Array} filters - 原始筛选条件
+   * @returns {Array} 排除业务分类维度后的筛选条件
+   *
+   * @example
+   * // 原始筛选：[{key: 'third_level_organization', values: ['天府']}, {key: 'customer_category', values: ['摩托车']}]
+   * // 返回：[{key: 'third_level_organization', values: ['天府']}]
+   * // 这样分母就是"天府所有客户类别"的数据，而不是"全国所有客户类别"
+   */
+  getDenominatorFilters(filters) {
+    // 业务分类维度列表（这些维度在计算分母时应被排除）
+    const businessDimensions = [
+      'customer_category',  // 客户类别
+      'business_type',      // 业务类型
+      'insurance_type',     // 险种
+      'coverage_type'       // 险别组合
+    ];
+
+    // 过滤掉业务分类维度，保留范围限定维度（如：三级机构、能源类型等）
+    return filters.filter(f => !businessDimensions.includes(f.key));
+  }
+
+  /**
    * 切换占比视图
    * @param {string} view - 'annual' (占年度保费比) | 'monthly' (占当月车险比)
    */
@@ -483,17 +508,15 @@ class PremiumAnalyzer {
   async renderMonthTrendChart() {
     const currentGroupBy = window.StateManager.getState('currentGroupBy');
 
-    // 确定占比配置
+    // 确定占比配置（不指定rightAxisMax，让图表服务自动计算）
     const ratioConfig = this.ratioView === 'annual'
       ? {
           rightAxisName: '占年度保费比(%)',
-          rightAxisField: 'annualRatio',
-          rightAxisMax: 20
+          rightAxisField: 'annualRatio'
         }
       : {
           rightAxisName: '占当月车险比(%)',
-          rightAxisField: 'monthlyRatio',
-          rightAxisMax: 75
+          rightAxisField: 'monthlyRatio'
         };
 
     // 如果当前不是按起保月聚合，需要重新聚合
@@ -520,13 +543,11 @@ class PremiumAnalyzer {
           // 占年度保费比：当月保费 / 全年保费
           chartData = window.DataProcessor.calculateAnnualRatio(chartData);
         } else {
-          // 占当月车险比：需要全量月度数据作为分母
-          // 如果没有缓存全量数据，先获取
-          if (!this.totalMonthlyData) {
-            const totalResult = await window.WorkerBridge.applyFilter([], 'start_month');
-            this.totalMonthlyData = totalResult.aggregated;
-          }
-          chartData = window.DataProcessor.calculateMonthlyRatio(chartData, this.totalMonthlyData);
+          // 占当月车险比：需要应用部分筛选条件的月度数据作为分母
+          // 分母排除业务分类维度，保留范围维度（如：三级机构、起保月等）
+          const denominatorFilters = this.getDenominatorFilters(filters);
+          const totalResult = await window.WorkerBridge.applyFilter(denominatorFilters, 'start_month');
+          chartData = window.DataProcessor.calculateMonthlyRatio(chartData, totalResult.aggregated);
         }
 
         // 渲染双Y轴图表
@@ -558,12 +579,11 @@ class PremiumAnalyzer {
         // 占年度保费比
         chartData = window.DataProcessor.calculateAnnualRatio(chartData);
       } else {
-        // 占当月车险比：需要全量月度数据
-        if (!this.totalMonthlyData) {
-          const totalResult = await window.WorkerBridge.applyFilter([], 'start_month');
-          this.totalMonthlyData = totalResult.aggregated;
-        }
-        chartData = window.DataProcessor.calculateMonthlyRatio(chartData, this.totalMonthlyData);
+        // 占当月车险比：分母应用部分筛选条件（排除业务分类维度）
+        const filters = window.StateManager.getState('filters.applied');
+        const denominatorFilters = this.getDenominatorFilters(filters);
+        const totalResult = await window.WorkerBridge.applyFilter(denominatorFilters, 'start_month');
+        chartData = window.DataProcessor.calculateMonthlyRatio(chartData, totalResult.aggregated);
       }
 
       this.components.chartService.renderChart(

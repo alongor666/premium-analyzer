@@ -137,10 +137,10 @@ function calculateAnnualRatio(data) {
   // 计算全年总保费
   const totalAnnualPremium = processedData.reduce((sum, item) => sum + (item.premium || 0), 0);
 
-  // 计算每月占年度保费比
+  // 计算每月占年度保费比（保留1位小数）
   processedData.forEach(item => {
     const ratio = totalAnnualPremium > 0 ? (item.premium || 0) / totalAnnualPremium : 0;
-    item.annualRatio = ratio * 100;  // 转为百分比
+    item.annualRatio = parseFloat((ratio * 100).toFixed(1));  // 转为百分比，保留1位小数
   });
 
   return processedData;
@@ -186,11 +186,11 @@ function calculateMonthlyRatio(filteredData, totalData) {
     monthlyTotals[item.dimension] = item.premium || 0;
   });
 
-  // 计算每月占当月车险比
+  // 计算每月占当月车险比（保留1位小数）
   processedData.forEach(item => {
     const monthTotal = monthlyTotals[item.dimension] || 0;
     const ratio = monthTotal > 0 ? (item.premium || 0) / monthTotal : 0;
-    item.monthlyRatio = ratio * 100;  // 转为百分比
+    item.monthlyRatio = parseFloat((ratio * 100).toFixed(1));  // 转为百分比，保留1位小数
   });
 
   return processedData;

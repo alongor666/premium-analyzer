@@ -150,28 +150,26 @@ class ChartService {
    * @param {string} options.leftAxisName - 左Y轴名称（默认：保费收入(万元)）
    * @param {string} options.rightAxisName - 右Y轴名称（默认：贡献度(%)）
    * @param {string} options.rightAxisField - 右Y轴数据字段（默认：contribution）
-   * @param {number} options.rightAxisMax - 右Y轴最大值（默认：根据rightAxisField自动判断）
+   * @param {number} options.rightAxisMax - 右Y轴最大值（默认：自动计算，向上取整到最近的5的倍数）
    * @param {boolean} options.sortByTime - 是否按时间排序（默认：true）
    * @param {boolean} options.showArea - 是否显示面积图（默认：true）
    * @param {boolean} options.rotateXLabel - 是否旋转X轴标签（默认：false）
    *
    * @example
-   * // 月度保费 + 占年度保费比（最高20%）
+   * // 月度保费 + 占年度保费比（自动计算最大值）
    * chartService.renderChart('chartId', 'dualAxisLine', data, {
    *   leftAxisName: '保费收入(万元)',
    *   rightAxisName: '占年度保费比(%)',
    *   rightAxisField: 'annualRatio',
-   *   rightAxisMax: 20,
    *   sortByTime: true
    * });
    *
    * @example
-   * // 月度保费 + 占当月车险比（最高75%）
+   * // 月度保费 + 占当月车险比（自动计算最大值）
    * chartService.renderChart('chartId', 'dualAxisLine', data, {
    *   leftAxisName: '保费收入(万元)',
    *   rightAxisName: '占当月车险比(%)',
    *   rightAxisField: 'monthlyRatio',
-   *   rightAxisMax: 75,
    *   sortByTime: true
    * });
    */
@@ -180,7 +178,7 @@ class ChartService {
       leftAxisName = '保费收入(万元)',
       rightAxisName = '贡献度(%)',
       rightAxisField = 'contribution',
-      rightAxisMax = null,  // 新增：允许自定义右Y轴最大值
+      rightAxisMax = null,  // 允许自定义右Y轴最大值，null时自动计算
       sortByTime = true,
       showArea = true,
       rotateXLabel = false
@@ -195,6 +193,22 @@ class ChartService {
     // 计算贡献度（如果数据中没有）
     if (rightAxisField === 'contribution' && !processedData[0]?.contribution && window.DataProcessor) {
       processedData = window.DataProcessor.calculateTimeSeriesContribution(processedData);
+    }
+
+    // 动态计算右Y轴最大值（如果未指定）
+    let calculatedRightAxisMax = rightAxisMax;
+    if (calculatedRightAxisMax === null) {
+      // 从数据中找出最大占比值
+      const maxRatioValue = Math.max(...processedData.map(d => d[rightAxisField] || 0));
+
+      // 向上取整到最近的5的倍数，确保图表美观
+      // 例如：23.5% -> 25%, 47.8% -> 50%, 91.2% -> 95%
+      calculatedRightAxisMax = Math.ceil(maxRatioValue / 5) * 5;
+
+      // 确保最小值为5%，避免Y轴太窄
+      calculatedRightAxisMax = Math.max(calculatedRightAxisMax, 5);
+
+      console.log(`[ChartService] 动态计算右Y轴最大值: 数据最大值=${maxRatioValue.toFixed(1)}%, 取整后=${calculatedRightAxisMax}%`);
     }
 
     return {
@@ -258,9 +272,7 @@ class ChartService {
             show: false  // 隐藏右Y轴网格线，避免与左Y轴冲突
           },
           min: 0,
-          max: rightAxisMax !== null
-            ? rightAxisMax  // 使用自定义最大值
-            : (rightAxisField === 'contribution' ? 100 : undefined)  // 默认：贡献度100%，其他自动
+          max: calculatedRightAxisMax  // 使用动态计算的最大值
         }
       ],
       series: [
