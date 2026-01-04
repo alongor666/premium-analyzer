@@ -82,6 +82,10 @@ class ChartService {
    * 折线图配置（月度趋势）
    */
   buildLineChart(data) {
+    const axisLabel = window.getPremiumAxisLabel
+      ? window.getPremiumAxisLabel('保费收入')
+      : '保费收入(万元)';
+
     return {
       grid: {
         left: '3%',
@@ -107,7 +111,7 @@ class ChartService {
       },
       yAxis: {
         type: 'value',
-        name: '保费收入(万元)',
+        name: axisLabel,
         axisLabel: {
           formatter: '{value}'
         }
@@ -175,7 +179,9 @@ class ChartService {
    */
   buildDualAxisLineChart(data, options = {}) {
     const {
-      leftAxisName = '保费收入(万元)',
+      leftAxisName = window.getPremiumAxisLabel
+        ? window.getPremiumAxisLabel('保费收入')
+        : '保费收入(万元)',
       rightAxisName = '贡献度(%)',
       rightAxisField = 'contribution',
       rightAxisMax = null,  // 允许自定义右Y轴最大值，null时自动计算
@@ -326,6 +332,9 @@ class ChartService {
    */
   buildBarChart(data, options = {}) {
     const { expandFromOthers = false } = options;
+    const axisLabel = window.getPremiumAxisLabel
+      ? window.getPremiumAxisLabel('保费收入')
+      : '保费收入(万元)';
 
     return {
       grid: {
@@ -366,7 +375,7 @@ class ChartService {
       },
       yAxis: {
         type: 'value',
-        name: '保费收入(万元)'
+        name: axisLabel
       },
       series: [{
         name: '保费收入',

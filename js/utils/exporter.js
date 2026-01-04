@@ -11,13 +11,19 @@ class DataExporter {
       return;
     }
 
-    const headers = ['维度', '保费收入（万元）', '占比', '记录数', '平均单均保费'];
+    const premiumHeader = window.getPremiumHeaderLabel
+      ? window.getPremiumHeaderLabel('保费收入')
+      : '保费收入（万元）';
+    const avgHeader = window.getPremiumHeaderLabel
+      ? window.getPremiumHeaderLabel('平均单均保费')
+      : '平均单均保费';
+    const headers = ['维度', premiumHeader, '占比', '记录数', avgHeader];
     const rows = data.map(row => [
       row.dimension,
-      (row.premium / 10000).toFixed(2),
+      window.formatPremiumNumber ? window.formatPremiumNumber(row.premium, 2) : row.premium.toFixed(2),
       (row.ratio * 100).toFixed(2) + '%',
       row.count,
-      (row.avgPremium || 0).toFixed(2)
+      window.formatPremiumNumber ? window.formatPremiumNumber(row.avgPremium || 0, 2) : (row.avgPremium || 0).toFixed(2)
     ]);
 
     // 添加BOM以支持Excel正确显示中文
@@ -45,12 +51,19 @@ class DataExporter {
       return;
     }
 
+    const premiumHeader = window.getPremiumHeaderLabel
+      ? window.getPremiumHeaderLabel('保费收入')
+      : '保费收入（万元）';
+    const avgHeader = window.getPremiumHeaderLabel
+      ? window.getPremiumHeaderLabel('平均单均保费')
+      : '平均单均保费';
+
     const worksheet = XLSX.utils.json_to_sheet(data.map(row => ({
       '维度': row.dimension,
-      '保费收入（万元）': (row.premium / 10000).toFixed(2),
+      [premiumHeader]: window.formatPremiumNumber ? window.formatPremiumNumber(row.premium, 2) : row.premium.toFixed(2),
       '占比': (row.ratio * 100).toFixed(2) + '%',
       '记录数': row.count,
-      '平均单均保费': (row.avgPremium || 0).toFixed(2)
+      [avgHeader]: window.formatPremiumNumber ? window.formatPremiumNumber(row.avgPremium || 0, 2) : (row.avgPremium || 0).toFixed(2)
     })));
 
     const workbook = XLSX.utils.book_new();

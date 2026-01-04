@@ -41,7 +41,7 @@ class ErrorHandler {
         return '文件格式不正确，请上传有效的Excel或CSV文件';
       }
       if (message.includes('大小') || message.includes('size')) {
-        return '文件大小超过限制（最大10MB），请压缩后重试';
+        return '文件大小超过限制（最大200MB），请压缩后重试';
       }
       return '文件读取失败，请确保文件有效且未损坏';
     }

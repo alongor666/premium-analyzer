@@ -44,13 +44,71 @@ function formatNumber(value, format = '0,0.00') {
   return num.toString();
 }
 
+function getPremiumUnitConfig() {
+  const fallback = { label: '万元', divisor: 1 };
+  if (typeof window === 'undefined' || !window.StateManager?.getState) {
+    return fallback;
+  }
+  const unit = window.StateManager.getState('premiumUnit');
+  if (!unit || !unit.label) {
+    return fallback;
+  }
+  const divisor = typeof unit.divisor === 'number' && !isNaN(unit.divisor) ? unit.divisor : 1;
+  return { label: unit.label, divisor };
+}
+
 /**
- * 格式化保费（万元）- 取整
+ * 格式化保费（动态单位）
  * @param {number} value - 保费数值
+ * @param {string} format - 数值格式（默认'0,0'）
  * @returns {string} 格式化后的字符串
  */
-function formatPremium(value) {
-  return formatNumber(value, '0,0') + ' 万元';
+function formatPremium(value, format = '0,0') {
+  const { label, divisor } = getPremiumUnitConfig();
+  const displayValue = divisor ? value / divisor : value;
+  return formatNumber(displayValue, format) + ' ' + label;
+}
+
+/**
+ * 获取保费单位标签
+ * @returns {string} 单位标签
+ */
+function getPremiumUnitLabel() {
+  return getPremiumUnitConfig().label;
+}
+
+/**
+ * 获取保费轴标题
+ * @param {string} prefix - 前缀文本
+ * @returns {string} 轴标题
+ */
+function getPremiumAxisLabel(prefix = '保费收入') {
+  const label = getPremiumUnitLabel();
+  return `${prefix}(${label})`;
+}
+
+/**
+ * 获取保费表头标题
+ * @param {string} prefix - 前缀文本
+ * @returns {string} 表头标题
+ */
+function getPremiumHeaderLabel(prefix = '保费收入') {
+  const label = getPremiumUnitLabel();
+  return `${prefix}（${label}）`;
+}
+
+/**
+ * 保费数字格式化（不带分组，便于导出）
+ * @param {number} value - 保费数值
+ * @param {number} decimals - 小数位数
+ * @returns {string} 格式化后的字符串
+ */
+function formatPremiumNumber(value, decimals = 2) {
+  const { divisor } = getPremiumUnitConfig();
+  const displayValue = divisor ? value / divisor : value;
+  const num = Number(displayValue);
+  if (isNaN(num)) return (0).toFixed(decimals);
+  return num.toFixed(decimals);
 }
 
 /**
@@ -172,6 +230,10 @@ function throttle(func, interval = 300) {
 if (typeof window !== 'undefined') {
   window.formatNumber = formatNumber;
   window.formatPremium = formatPremium;
+  window.getPremiumUnitLabel = getPremiumUnitLabel;
+  window.getPremiumAxisLabel = getPremiumAxisLabel;
+  window.getPremiumHeaderLabel = getPremiumHeaderLabel;
+  window.formatPremiumNumber = formatPremiumNumber;
   window.formatRatio = formatRatio;
   window.formatLargeNumber = formatLargeNumber;
   window.formatDate = formatDate;

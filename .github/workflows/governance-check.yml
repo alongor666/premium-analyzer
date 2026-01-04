@@ -1,0 +1,59 @@
+name: Governance Check
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  governance:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Run governance check
+        run: node scripts/check-governance.mjs
+        continue-on-error: false
+
+      - name: Generate report
+        if: always()
+        run: |
+          mkdir -p reports
+          node scripts/check-governance.mjs > reports/governance-report.txt 2>&1 || true
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: governance-report
+          path: reports/governance-report.txt
+          retention-days: 30
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            let comment = '## 🔍 Governance Check Report\n\n';
+            try {
+              const report = fs.readFileSync('reports/governance-report.txt', 'utf8');
+              comment += '```\n' + report + '\n```';
+            } catch (error) {
+              comment += '❌ Failed to generate report\n';
+            }
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });

@@ -30,6 +30,12 @@ class StateManager {
         monthRange: []
       },
 
+      // 保费单位
+      premiumUnit: {
+        label: '万元',
+        divisor: 1
+      },
+
       // 维度唯一值
       dimensions: {},
 
@@ -229,6 +235,7 @@ class StateManager {
       activeTab: 'overview',
       aggregatedData: null,
       globalStats: { totalPremium: 0, totalCount: 0, monthRange: [] },
+      premiumUnit: { label: '万元', divisor: 1 },
       dimensions: {},
       ui: { activeDropdown: null, loading: false, error: null }
     };

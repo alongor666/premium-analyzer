@@ -38,7 +38,7 @@
         <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" hidden>
         <button class="btn btn-primary" id="selectFileBtn">选择文件</button>
         <div class="upload-hint">
-          支持格式：.csv, .xlsx, .xls | 最大10MB
+          支持格式：.csv, .xlsx, .xls | 最大200MB
         </div>
       </div>
 
@@ -102,12 +102,24 @@
           <div class="charts-container">
             <div class="chart-card">
               <div class="chart-header">
-                <h3 class="chart-title">月度保费趋势</h3>
-                <div class="ratio-view-toggle">
-                  <label class="toggle-label">占比视图：</label>
-                  <div class="btn-group">
-                    <button class="btn btn-xs btn-toggle active" data-ratio-view="annual">占年度保费比</button>
-                    <button class="btn btn-xs btn-toggle" data-ratio-view="monthly">占当月车险比</button>
+                <h3 class="chart-title">保费趋势</h3>
+                <div class="chart-actions">
+                  <!-- 时间粒度切换 -->
+                  <div class="ratio-view-toggle" style="margin-right: 16px;">
+                    <label class="toggle-label">时间粒度：</label>
+                    <div class="btn-group">
+                      <button class="btn btn-xs btn-toggle" data-time-granularity="day">按日</button>
+                      <button class="btn btn-xs btn-toggle" data-time-granularity="week">按周</button>
+                      <button class="btn btn-xs btn-toggle active" data-time-granularity="month">按月</button>
+                    </div>
+                  </div>
+                  <!-- 占比视图切换 -->
+                  <div class="ratio-view-toggle">
+                    <label class="toggle-label">占比视图：</label>
+                    <div class="btn-group">
+                      <button class="btn btn-xs btn-toggle active" data-ratio-view="annual">占年度保费比</button>
+                      <button class="btn btn-xs btn-toggle" data-ratio-view="monthly">占当月车险比</button>
+                    </div>
                   </div>
                 </div>
               </div>

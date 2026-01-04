@@ -9,6 +9,7 @@ class PremiumAnalyzer {
     this.isInitialized = false;
     this.ratioView = 'annual';  // 占比视图：'annual' (占年度保费比) | 'monthly' (占当月车险比)
     this.totalMonthlyData = null;  // 缓存全量月度数据（用于计算占当月车险比）
+    this.timeGranularity = 'month';  // 时间粒度：'day' (按日) | 'week' (按周) | 'month' (按月)
   }
 
   /**
@@ -125,12 +126,44 @@ class PremiumAnalyzer {
   }
 
   /**
+   * 合并配置维度和动态维度
+   */
+  mergeDimensionConfigs(configDimensions, dynamicDimensions) {
+    const merged = [...configDimensions];
+
+    // 动态维度添加到末尾
+    for (const dynDim of (dynamicDimensions || [])) {
+      // 检查key是否冲突
+      const exists = merged.some(d => d.key === dynDim.key);
+      if (!exists) {
+        merged.push({
+          ...dynDim,
+          isDynamic: true
+        });
+      }
+    }
+
+    // 按group排序
+    merged.sort((a, b) => a.group - b.group);
+
+    console.log(`[App] 维度配置合并: 配置${configDimensions.length}个 + 动态${dynamicDimensions?.length || 0}个 = ${merged.length}个`);
+
+    return merged;
+  }
+
+  /**
    * 绑定全局事件
    */
   attachGlobalEvents() {
     // 监听文件解析完成
     window.EventBus.on('file:parsed', (result) => {
       console.log('[App] 文件解析完成:', result);
+
+      // 合并维度配置
+      const mergedDimensions = this.mergeDimensionConfigs(
+        this.config.dimensions,
+        result.dynamicDimensions || []
+      );
 
       // 保存数据到状态管理器
       window.StateManager.setState({
@@ -140,14 +173,27 @@ class PremiumAnalyzer {
           totalCount: result.total,
           monthRange: result.monthRange
         },
-        dimensions: result.dimensions
+        premiumUnit: result.premiumUnit,
+        dimensions: result.dimensions,
+        mergedDimensionsConfig: mergedDimensions  // 新增
       });
 
-      // 初始化维度筛选器
+      // 重新创建维度选择器 (使用合并配置)
+      this.components.dimensionSelector = new DimensionSelector(
+        document.getElementById('dimensionSelectors'),
+        mergedDimensions  // 使用合并配置
+      );
       this.components.dimensionSelector.init(result.dimensions);
 
       // 渲染初始仪表盘（无筛选条件）
       this.renderDashboard();
+
+      // 显示映射信息 (控制台日志)
+      if (result.mappingSummary) {
+        console.log('[App] 字段映射统计:', result.mappingSummary);
+        console.log('[App] 动态维度:', result.dynamicDimensions?.map(d => d.label));
+        console.log('[App] 未匹配维度:', result.unmatchedDimensions?.map(d => d.label));
+      }
     });
 
     // 监听筛选应用
@@ -246,6 +292,14 @@ class PremiumAnalyzer {
       btn.addEventListener('click', (e) => {
         const view = e.target.dataset.ratioView;
         this.switchRatioView(view);
+      });
+    });
+
+    // 时间粒度切换按钮
+    document.querySelectorAll('[data-time-granularity]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const granularity = e.target.dataset.timeGranularity;
+        this.switchTimeGranularity(granularity);
       });
     });
   }
@@ -501,12 +555,39 @@ class PremiumAnalyzer {
   }
 
   /**
-   * 渲染月度趋势图（概览页专用）
-   * 概览页固定使用起保月聚合，不受当前维度影响
+   * 切换时间粒度
+   * @param {string} granularity - 'day' (按日) | 'week' (按周) | 'month' (按月)
+   */
+  switchTimeGranularity(granularity) {
+    if (this.timeGranularity === granularity) return;  // 无变化
+
+    console.log(`[App] 切换时间粒度: ${this.timeGranularity} -> ${granularity}`);
+    this.timeGranularity = granularity;
+
+    // 更新按钮状态
+    document.querySelectorAll('[data-time-granularity]').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.timeGranularity === granularity);
+    });
+
+    // 重新渲染图表
+    this.renderMonthTrendChart();
+  }
+
+  /**
+   * 渲染保费趋势图（支持多时间粒度）
+   * 概览页支持按日/周/月三种粒度聚合
    * 双Y轴图表：左Y轴显示保费收入，右Y轴显示保费贡献度（支持两种占比视图）
    */
   async renderMonthTrendChart() {
     const currentGroupBy = window.StateManager.getState('currentGroupBy');
+
+    // 根据时间粒度确定聚合维度
+    const timeGranularityMap = {
+      'day': 'start_date',     // 按日
+      'week': 'week_day',      // 按周
+      'month': 'start_month'   // 按月
+    };
+    const targetDimension = timeGranularityMap[this.timeGranularity];
 
     // 确定占比配置（不指定rightAxisMax，让图表服务自动计算）
     const ratioConfig = this.ratioView === 'annual'
@@ -515,13 +596,15 @@ class PremiumAnalyzer {
           rightAxisField: 'annualRatio'
         }
       : {
-          rightAxisName: '占当月车险比(%)',
-          rightAxisField: 'monthlyRatio'
+          rightAxisName: this.timeGranularity === 'day' ? '占当日车险比(%)' :
+                         this.timeGranularity === 'week' ? '占当周车险比(%)' :
+                         '占当月车险比(%)',
+          rightAxisField: 'monthlyRatio'  // 复用monthlyRatio字段名（实际计算按粒度）
         };
 
-    // 如果当前不是按起保月聚合，需要重新聚合
-    if (currentGroupBy !== 'start_month') {
-      console.log('[App] 概览页需要按起保月聚合，重新查询...');
+    // 如果当前不是按目标维度聚合，需要重新聚合
+    if (currentGroupBy !== targetDimension) {
+      console.log(`[App] 概览页需要按${targetDimension}聚合，重新查询...`);
 
       try {
         // 显示加载状态
@@ -530,8 +613,8 @@ class PremiumAnalyzer {
         // 获取当前筛选条件
         const filters = window.StateManager.getState('filters.applied');
 
-        // 按起保月重新聚合（获取筛选后数据）
-        const result = await window.WorkerBridge.applyFilter(filters, 'start_month');
+        // 按目标时间维度重新聚合（获取筛选后数据）
+        const result = await window.WorkerBridge.applyFilter(filters, targetDimension);
 
         // 隐藏加载状态
         this.hideLoading();
@@ -540,13 +623,13 @@ class PremiumAnalyzer {
         let chartData = result.aggregated;
 
         if (this.ratioView === 'annual') {
-          // 占年度保费比：当月保费 / 全年保费
+          // 占年度保费比：当期保费 / 全年保费
           chartData = window.DataProcessor.calculateAnnualRatio(chartData);
         } else {
-          // 占当月车险比：需要应用部分筛选条件的月度数据作为分母
-          // 分母排除业务分类维度，保留范围维度（如：三级机构、起保月等）
+          // 占比视图：需要应用部分筛选条件的数据作为分母
+          // 分母排除业务分类维度，保留范围维度（如：三级机构等）
           const denominatorFilters = this.getDenominatorFilters(filters);
-          const totalResult = await window.WorkerBridge.applyFilter(denominatorFilters, 'start_month');
+          const totalResult = await window.WorkerBridge.applyFilter(denominatorFilters, targetDimension);
           chartData = window.DataProcessor.calculateMonthlyRatio(chartData, totalResult.aggregated);
         }
 
@@ -556,22 +639,24 @@ class PremiumAnalyzer {
           'dualAxisLine',
           chartData,
           {
-            leftAxisName: '保费收入(万元)',
+            leftAxisName: window.getPremiumAxisLabel
+              ? window.getPremiumAxisLabel('保费收入')
+              : '保费收入(万元)',
             ...ratioConfig,
             sortByTime: true,
             showArea: true,
-            rotateXLabel: false
+            rotateXLabel: this.timeGranularity === 'day'  // 按日显示时旋转标签
           }
         );
 
       } catch (error) {
-        console.error('[App] 加载起保月数据失败:', error);
+        console.error(`[App] 加载${targetDimension}数据失败:`, error);
         this.hideLoading();
         this.showError('加载失败', error.message);
       }
 
     } else {
-      // 当前已是按起保月聚合，直接使用现有数据
+      // 当前已是按目标维度聚合，直接使用现有数据
       let chartData = window.StateManager.getState('aggregatedData');
 
       // 处理数据并计算占比
@@ -579,10 +664,10 @@ class PremiumAnalyzer {
         // 占年度保费比
         chartData = window.DataProcessor.calculateAnnualRatio(chartData);
       } else {
-        // 占当月车险比：分母应用部分筛选条件（排除业务分类维度）
+        // 占比视图：分母应用部分筛选条件（排除业务分类维度）
         const filters = window.StateManager.getState('filters.applied');
         const denominatorFilters = this.getDenominatorFilters(filters);
-        const totalResult = await window.WorkerBridge.applyFilter(denominatorFilters, 'start_month');
+        const totalResult = await window.WorkerBridge.applyFilter(denominatorFilters, targetDimension);
         chartData = window.DataProcessor.calculateMonthlyRatio(chartData, totalResult.aggregated);
       }
 
@@ -591,11 +676,13 @@ class PremiumAnalyzer {
         'dualAxisLine',
         chartData,
         {
-          leftAxisName: '保费收入(万元)',
+          leftAxisName: window.getPremiumAxisLabel
+            ? window.getPremiumAxisLabel('保费收入')
+            : '保费收入(万元)',
           ...ratioConfig,
           sortByTime: true,
           showArea: true,
-          rotateXLabel: false
+          rotateXLabel: this.timeGranularity === 'day'  // 按日显示时旋转标签
         }
       );
     }
@@ -639,7 +726,10 @@ class PremiumAnalyzer {
     // 创建表头
     const thead = document.createElement('thead');
     const headerRow = document.createElement('tr');
-    ['维度', '保费收入（万元）', '占比', '记录数'].forEach(text => {
+    const premiumHeader = window.getPremiumHeaderLabel
+      ? window.getPremiumHeaderLabel('保费收入')
+      : '保费收入（万元）';
+    ['维度', premiumHeader, '占比', '记录数'].forEach(text => {
       const th = document.createElement('th');
       th.textContent = text;
       headerRow.appendChild(th);
@@ -660,7 +750,9 @@ class PremiumAnalyzer {
 
       // 保费收入（数值安全，无需转义）
       const premiumCell = document.createElement('td');
-      premiumCell.textContent = (row.premium / 10000).toFixed(2);
+      premiumCell.textContent = window.formatPremiumNumber
+        ? window.formatPremiumNumber(row.premium, 2)
+        : row.premium.toFixed(2);
       tr.appendChild(premiumCell);
 
       // 占比（数值安全，无需转义）
@@ -819,15 +911,19 @@ class PremiumAnalyzer {
     console.log('[App] 重新导入数据');
 
     // 清空状态
-    window.StateManager.setState({
-      rawData: null,
-      globalStats: null,
-      aggregatedData: null,
-      dimensions: null,
-      filters: {
-        draft: {},
-        applied: {}
-      }
+      window.StateManager.setState({
+        rawData: null,
+        globalStats: null,
+        aggregatedData: null,
+        dimensions: null,
+        premiumUnit: {
+          label: '万元',
+          divisor: 1
+        },
+        filters: {
+          draft: {},
+          applied: {}
+        }
     });
 
     // 隐藏仪表盘区域

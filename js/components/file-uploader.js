@@ -69,7 +69,7 @@ class FileUploader {
 
     // 验证文件大小
     if (!validateFileSize(file)) {
-      this.showError('文件过大', '文件大小不能超过 10MB');
+      this.showError('文件过大', '文件大小不能超过 200MB');
       return;
     }
 
@@ -77,13 +77,20 @@ class FileUploader {
       // 显示加载状态
       this.showLoading('正在解析文件...');
 
+      // 获取配置
+      const config = window.app?.config || { dimensions: [], metric: {} };
+
       // 监听Worker进度
       const cancelProgress = this.workerBridge.onProgress((progress) => {
         this.updateLoadingText(progress);
       });
 
-      // 解析文件
-      const result = await this.workerBridge.parseFile(file);
+      // 解析文件 (传递config)
+      const result = await this.workerBridge.parseFile(
+        file,
+        config.dimensions,  // 新增
+        config.metric       // 新增
+      );
 
       // 取消进度监听
       cancelProgress();

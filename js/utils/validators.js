@@ -21,7 +21,7 @@ function validateFileType(file, allowedTypes = ['.csv', '.xlsx', '.xls']) {
  * @param {number} maxSize - 最大大小（字节）
  * @returns {boolean} 是否有效
  */
-function validateFileSize(file, maxSize = 10 * 1024 * 1024) {
+function validateFileSize(file, maxSize = 200 * 1024 * 1024) {
   if (!file) return false;
   return file.size <= maxSize;
 }

@@ -10,13 +10,43 @@
       "searchable": true
     },
     {
+      "key": "start_date",
+      "label": "起保日期",
+      "csvFields": ["起保日期", "日期", "保单日期", "date"],
+      "color": "#92d050",
+      "group": 2,
+      "type": "time",
+      "format": "YYYY-MM-DD",
+      "sortable": true,
+      "timeGranularity": "day"
+    },
+    {
       "key": "start_month",
       "label": "起保月",
-      "csvFields": ["起保月", "保单月份", "month", "起保日期"],
+      "csvFields": ["起保月", "年月", "月份", "保单月份", "month"],
       "color": "#00b050",
       "group": 2,
       "type": "time",
       "format": "YYYY-MM",
+      "sortable": true,
+      "timeGranularity": "month"
+    },
+    {
+      "key": "week_day",
+      "label": "星期",
+      "csvFields": ["星期", "周几", "weekday", "week_day"],
+      "color": "#70ad47",
+      "group": 2,
+      "type": "time",
+      "sortable": true,
+      "timeGranularity": "week"
+    },
+    {
+      "key": "is_weekend",
+      "label": "是否周末",
+      "csvFields": ["是否周末", "周末", "weekend"],
+      "color": "#a9d08e",
+      "group": 2,
       "sortable": true
     },
     {
@@ -110,9 +140,9 @@
     "aggregation": "sum"
   },
   "metadata": {
-    "version": "2.2.0",
+    "version": "2.3.0",
     "created": "2025-12-26",
-    "updated": "2025-12-30",
-    "description": "完整版配置：11个维度（三级机构、起保月、客户类别、能源类型、险别组合、是否过户车、续保状态、业务类型、吨位分段、险种、终端来源）。注：险种和终端来源为可选维度，具体可用维度取决于数据文件。"
+    "updated": "2026-01-04",
+    "description": "完整版配置：14个维度（三级机构、起保日期、起保月、星期、是否周末、客户类别、能源类型、险别组合、是否过户车、续保状态、业务类型、吨位分段、险种、终端来源）。支持多时间粒度分析（日/周/月）。"
   }
 }

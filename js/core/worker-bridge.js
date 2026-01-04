@@ -85,9 +85,11 @@ class WorkerBridge {
   /**
    * 解析文件
    * @param {File} file - 文件对象
+   * @param {Array} configDimensions - 维度配置(可选)
+   * @param {Object} metricConfig - 保费配置(可选)
    * @returns {Promise} 解析结果
    */
-  async parseFile(file) {
+  async parseFile(file, configDimensions, metricConfig) {
     console.log('[WorkerBridge] 开始解析文件:', file.name);
 
     try {
@@ -97,7 +99,9 @@ class WorkerBridge {
       const result = await this.sendMessage('PARSE_FILE', {
         fileContent: arrayBuffer,
         fileName: file.name,
-        fileType
+        fileType,
+        configDimensions,  // 新增
+        metricConfig       // 新增
       });
 
       console.log('[WorkerBridge] 文件解析完成:', result);
